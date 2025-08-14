@@ -1,45 +1,59 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  Image, 
-  TouchableOpacity, 
-  Dimensions 
+import { firebaseService } from '@/services/firebaseService';
+import { useStore } from '@/store/useStore';
+import { router, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Heart, ShoppingCart, Star } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, router } from 'expo-router';
-import { ArrowLeft, Heart, Star, ShoppingCart } from 'lucide-react-native';
-import { products } from '@/constants/products';
-import { useStore } from '@/store/useStore';
 
 const { width } = Dimensions.get('window');
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
-  const product = products.find(p => p.id === id);
-  
   const { favorites, toggleFavorite, addToCart } = useStore();
+
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
-  
-  if (!product) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Product not found</Text>
-      </SafeAreaView>
-    );
-  }
+  const [error, setError] = useState<string | null>(null);
 
-  const isFavorite = favorites.includes(product.id);
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchProduct = async () => {
+      setLoading(true);
+      setError(null);
+
+      const data = await firebaseService.getProductById(id as string);
+      if (!data) {
+        setError("Product not found");
+      } else {
+        setProduct(data);
+      }
+
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const isFavorite = product && favorites.includes(product.id);
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
       alert('Please select size and color');
       return;
     }
-    
     addToCart(product, selectedSize, selectedColor);
     alert('Added to cart!');
   };
@@ -49,39 +63,56 @@ export default function ProductDetailScreen() {
       alert('Please select size and color');
       return;
     }
-    
     addToCart(product, selectedSize, selectedColor);
     router.push('/cart');
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" color="#333" />
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Text>{error || 'Product not found'}</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => toggleFavorite(product.id)} style={styles.favoriteButton}>
-          <Heart 
-            size={24} 
-            color={isFavorite ? '#ff4757' : '#333'} 
+          <Heart
+            size={24}
+            color={isFavorite ? '#ff4757' : '#333'}
             fill={isFavorite ? '#ff4757' : 'transparent'}
           />
         </TouchableOpacity>
       </View>
 
+      {/* Scrollable Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
         <Image source={{ uri: product.image }} style={styles.productImage} />
-        
+
         <View style={styles.content}>
           <Text style={styles.brand}>{product.brand}</Text>
           <Text style={styles.title}>{product.title}</Text>
-          
+
           <View style={styles.ratingContainer}>
             <Star size={16} color="#ffa502" fill="#ffa502" />
             <Text style={styles.rating}>{product.rating}</Text>
             <Text style={styles.reviews}>({product.reviews} reviews)</Text>
           </View>
-          
+
           <View style={styles.priceContainer}>
             <Text style={styles.price}>₹{product.price}</Text>
             {product.originalPrice && (
@@ -92,65 +123,74 @@ export default function ProductDetailScreen() {
             )}
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Size</Text>
-            <View style={styles.optionsContainer}>
-              {product.sizes.map((size) => (
-                <TouchableOpacity
-                  key={size}
-                  style={[
-                    styles.optionButton,
-                    selectedSize === size && styles.optionButtonSelected
-                  ]}
-                  onPress={() => setSelectedSize(size)}
-                >
-                  <Text style={[
-                    styles.optionText,
-                    selectedSize === size && styles.optionTextSelected
-                  ]}>
-                    {size}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {/* Sizes */}
+          {product.sizes?.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Size</Text>
+              <View style={styles.optionsContainer}>
+                {product.sizes.map((size: any) => (
+                  <TouchableOpacity
+                    key={size}
+                    style={[
+                      styles.optionButton,
+                      selectedSize === size && styles.optionButtonSelected
+                    ]}
+                    onPress={() => setSelectedSize(size)}
+                  >
+                    <Text style={[
+                      styles.optionText,
+                      selectedSize === size && styles.optionTextSelected
+                    ]}>
+                      {size}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
+          )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Color</Text>
-            <View style={styles.optionsContainer}>
-              {product.colors.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[
-                    styles.optionButton,
-                    selectedColor === color && styles.optionButtonSelected
-                  ]}
-                  onPress={() => setSelectedColor(color)}
-                >
-                  <Text style={[
-                    styles.optionText,
-                    selectedColor === color && styles.optionTextSelected
-                  ]}>
-                    {color}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {/* Colors */}
+          {product.colors?.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Color</Text>
+              <View style={styles.optionsContainer}>
+                {product.colors.map((color: any) => (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.optionButton,
+                      selectedColor === color && styles.optionButtonSelected
+                    ]}
+                    onPress={() => setSelectedColor(color)}
+                  >
+                    <Text style={[
+                      styles.optionText,
+                      selectedColor === color && styles.optionTextSelected
+                    ]}>
+                      {color}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
+          )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{product.description}</Text>
-          </View>
+          {/* Description */}
+          {product.description && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.description}>{product.description}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
+      {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
           <ShoppingCart size={20} color="#333" />
           <Text style={styles.addToCartText}>Add to Cart</Text>
         </TouchableOpacity>
-        
         <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
           <Text style={styles.buyNowText}>Buy Now</Text>
         </TouchableOpacity>
@@ -314,4 +354,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });

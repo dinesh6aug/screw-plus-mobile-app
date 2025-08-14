@@ -1,17 +1,18 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  onSnapshot,
-  query,
-  orderBy,
-  Timestamp 
-} from 'firebase/firestore';
 import { db } from '@/config/firebase';
-import { Product, Category, Banner } from '@/types/product';
+import { Banner, Category, Product } from '@/types/product';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc
+} from 'firebase/firestore';
 
 export interface FirebaseProduct extends Omit<Product, 'id'> {
   createdAt: Timestamp;
@@ -173,6 +174,23 @@ class FirebaseService {
       })) as Banner[];
       callback(banners);
     });
+  }
+
+  // Inside class FirebaseService
+  async getProductById(id: string): Promise<Product | null> {
+    try {
+      const productRef = doc(db, 'products', id);
+      const snapshot = await getDoc(productRef);
+
+      if (snapshot.exists()) {
+        return { id: snapshot.id, ...snapshot.data() } as Product;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      return null;
+    }
   }
 }
 

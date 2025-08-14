@@ -44,7 +44,7 @@ export default function CategoriesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.title}>Categories</Text>
         <Text style={styles.subtitle}>{filteredProducts.length} products found</Text>
