@@ -1,29 +1,43 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { FirebaseDataProvider } from "@/store/useFirebaseData";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
+
+function RootLayoutNav() {
+  return (
+    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="product/[id]" options={{ headerShown: false, title: "Product Details" }} />
+      <Stack.Screen name="orders" options={{ headerShown: true, title: "My Orders" }} />
+      <Stack.Screen name="addresses" options={{ headerShown: true, title: "Addresses" }} />
+      <Stack.Screen name="payment-methods" options={{ headerShown: true, title: "Payment Methods" }} />
+      <Stack.Screen name="notifications" options={{ headerShown: true, title: "Notifications" }} />
+      <Stack.Screen name="wishlist" options={{ headerShown: true, title: "Wishlist" }} />
+      <Stack.Screen name="settings" options={{ headerShown: true, title: "Settings" }} />
+      <Stack.Screen name="admin" options={{ headerShown: true, title: "Admin Panel" }} />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <FirebaseDataProvider>
+        <GestureHandlerRootView>
+          <RootLayoutNav />
+        </GestureHandlerRootView>
+      </FirebaseDataProvider>
+    </QueryClientProvider>
   );
 }

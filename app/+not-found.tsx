@@ -1,19 +1,20 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Link, Stack } from "expo-router";
+import { ShoppingBag } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen does not exist.</ThemedText>
+      <Stack.Screen options={{ title: "Page Not Found" }} />
+      <View style={styles.container}>
+        <ShoppingBag size={64} color="#ccc" />
+        <Text style={styles.title}>Page Not Found</Text>
+        <Text style={styles.subtitle}>The page you&rsquo;re looking for doesn&rsquo;t exist.</Text>
+
         <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+          <Text style={styles.linkText}>Go to Home</Text>
         </Link>
-      </ThemedView>
+      </View>
     </>
   );
 }
@@ -21,12 +22,33 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
   },
   link: {
-    marginTop: 15,
-    paddingVertical: 15,
+    backgroundColor: '#333',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  linkText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: '600',
   },
 });
