@@ -23,7 +23,7 @@ export default function CartScreen() {
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.cartItem}>
       <Image source={{ uri: item.product.image }} style={styles.itemImage} />
-      
+
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle} numberOfLines={2}>
           {item.product.title}
@@ -32,7 +32,7 @@ export default function CartScreen() {
           Size: {item.selectedSize} | Color: {item.selectedColor}
         </Text>
         <Text style={styles.itemPrice}>₹{item.product.price}</Text>
-        
+
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             style={styles.quantityButton}
@@ -40,9 +40,9 @@ export default function CartScreen() {
           >
             <Minus size={16} color="#666" />
           </TouchableOpacity>
-          
+
           <Text style={styles.quantity}>{item.quantity}</Text>
-          
+
           <TouchableOpacity
             style={styles.quantityButton}
             onPress={() => handleQuantityChange(item, item.quantity + 1)}
@@ -51,7 +51,7 @@ export default function CartScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <TouchableOpacity
         style={styles.removeButton}
         onPress={() => handleRemoveItem(item)}
@@ -63,48 +63,52 @@ export default function CartScreen() {
 
   if (cart.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Shopping Cart</Text>
-        </View>
-        
-        <View style={styles.emptyContainer}>
-          <ShoppingBag size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>Your cart is empty</Text>
-          <Text style={styles.emptySubtitle}>
-            Add some products to get started
-          </Text>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Shopping Cart</Text>
+          </View>
+
+          <View style={styles.emptyContainer}>
+            <ShoppingBag size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>Your cart is empty</Text>
+            <Text style={styles.emptySubtitle}>
+              Add some products to get started
+            </Text>
+          </View>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Shopping Cart</Text>
-        <TouchableOpacity onPress={clearCart}>
-          <Text style={styles.clearButton}>Clear All</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={cart}
-        renderItem={renderCartItem}
-        keyExtractor={(item) => `${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.cartList}
-      />
-
-      <View style={styles.footer}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total Amount:</Text>
-          <Text style={styles.totalAmount}>₹{getCartTotal()}</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Shopping Cart</Text>
+          <TouchableOpacity onPress={clearCart}>
+            <Text style={styles.clearButton}>Clear All</Text>
+          </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity style={styles.checkoutButton}>
-          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-        </TouchableOpacity>
+
+        <FlatList
+          data={cart}
+          renderItem={renderCartItem}
+          keyExtractor={(item) => `${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.cartList}
+        />
+
+        <View style={styles.footer}>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Total Amount:</Text>
+            <Text style={styles.totalAmount}>₹{getCartTotal()}</Text>
+          </View>
+
+          <TouchableOpacity style={styles.checkoutButton}>
+            <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );

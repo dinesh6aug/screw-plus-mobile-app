@@ -36,22 +36,22 @@ export default function HomeScreen() {
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         <Text style={styles.greeting}>Hello! 👋</Text>
-        <Text style={styles.welcomeText}>Welcome to Campus Sutra</Text>
+        <Text style={styles.welcomeText}>Welcome to Screw Plus</Text>
       </View>
       <View style={styles.headerRight}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/search')}
         >
           <Search size={24} color="#333" />
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/notifications')}
         >
           <Bell size={24} color="#333" />
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.headerButton, styles.cartButton]}
           onPress={() => router.push('/cart')}
         >
@@ -88,52 +88,54 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {renderHeader()}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {loading.banners ? (
-            <View style={styles.loadingBanner}>
-              <Text style={styles.loadingText}>Loading banners...</Text>
-            </View>
-          ) : (
-            <BannerCarousel banners={banners} />
-          )}
-          
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Shop by Category</Text>
-            {loading.categories ? (
-              <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading categories...</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+      <View style={styles.container}>
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          {renderHeader()}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {loading.banners ? (
+              <View style={styles.loadingBanner}>
+                <Text style={styles.loadingText}>Loading banners...</Text>
               </View>
             ) : (
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                style={styles.categoriesContainer}
-              >
-                {categories.map((category) => (
-                  <CategoryCard key={category.id} category={category} />
-                ))}
-              </ScrollView>
+              <BannerCarousel banners={banners} />
             )}
-          </View>
 
-          {loading.products ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading products...</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Shop by Category</Text>
+              {loading.categories ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Loading categories...</Text>
+                </View>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.categoriesContainer}
+                >
+                  {categories.map((category) => (
+                    <CategoryCard key={category.id} category={category} />
+                  ))}
+                </ScrollView>
+              )}
             </View>
-          ) : (
-            <>
-              {newArrivals.length > 0 && renderSection('New Arrivals', newArrivals, true)}
-              {bestSellers.length > 0 && renderSection('Best Sellers', bestSellers, true)}
-              {renderSection('Featured Products', featuredProducts, true)}
-            </>
-          )}
-          
-          <View style={styles.bottomSpacing} />
-        </ScrollView>
-      </Animated.View>
+
+            {loading.products ? (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Loading products...</Text>
+              </View>
+            ) : (
+              <>
+                {newArrivals.length > 0 && renderSection('New Arrivals', newArrivals, true)}
+                {bestSellers.length > 0 && renderSection('Best Sellers', bestSellers, true)}
+                {renderSection('Featured Products', featuredProducts, true)}
+              </>
+            )}
+
+            <View style={styles.bottomSpacing} />
+          </ScrollView>
+        </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }

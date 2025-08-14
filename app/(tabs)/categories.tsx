@@ -1,19 +1,46 @@
 import ProductCard from '@/components/ProductCard';
-import { categories, products } from '@/constants/products';
+import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
-import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CategoriesScreen() {
   const { selectedCategory, setSelectedCategory } = useStore();
   const [activeCategory, setActiveCategory] = useState(selectedCategory);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const categoryOptions = ['All', ...categories.map(cat => cat.name)];
+  // Fetch categories & products from Firebase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  const filteredProducts = activeCategory === 'All'
-    ? products
-    : products.filter(product => product.category === activeCategory);
+        const [categoryData, productData] = await Promise.all([
+          firebaseService.getCategories(),
+          firebaseService.getProducts()
+        ]);
+
+        setCategories(categoryData.map(cat => cat.name));
+        setProducts(productData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const categoryOptions = ['All', ...categories];
+
+  const filteredProducts =
+    activeCategory === 'All'
+      ? products
+      : products.filter(product => product.category === activeCategory);
 
   const handleCategoryPress = (category: string) => {
     setActiveCategory(category);
@@ -34,39 +61,52 @@ export default function CategoriesScreen() {
       ]}
       onPress={() => handleCategoryPress(item)}
     >
-      <Text style={[
-        styles.categoryFilterText,
-        activeCategory === item && styles.categoryFilterTextActive
-      ]}>
+      <Text
+        style={[
+          styles.categoryFilterText,
+          activeCategory === item && styles.categoryFilterTextActive
+        ]}
+      >
         {item}
       </Text>
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#333" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Categories</Text>
-        <Text style={styles.subtitle}>{filteredProducts.length} products found</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Categories</Text>
+          <Text style={styles.subtitle}>{filteredProducts.length} products found</Text>
+        </View>
+
+        <FlatList
+          data={categoryOptions}
+          renderItem={renderCategoryFilter}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryFilters}
+          contentContainerStyle={styles.categoryFiltersContent}
+        />
+
+        <FlatList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.productsContainer}
+          keyExtractor={item => item.id}
+        />
       </View>
-
-      <FlatList
-        data={categoryOptions}
-        renderItem={renderCategoryFilter}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryFilters}
-        contentContainerStyle={styles.categoryFiltersContent}
-      />
-
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.productsContainer}
-      />
     </SafeAreaView>
   );
 }
@@ -132,5 +172,10 @@ const styles = StyleSheet.create({
   productContainer: {
     flex: 1,
     marginHorizontal: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

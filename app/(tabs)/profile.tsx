@@ -1,20 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { 
-  User, 
-  ShoppingBag, 
-  Heart, 
-  MapPin, 
-  CreditCard, 
-  Bell, 
-  HelpCircle, 
-  Settings,
-  LogOut,
+import {
+  Bell,
   ChevronRight,
-  Shield
+  CreditCard,
+  Heart,
+  HelpCircle,
+  LogOut,
+  MapPin,
+  Settings,
+  Shield,
+  ShoppingBag,
+  User
 } from 'lucide-react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const menuItems = [
@@ -64,8 +64,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
           <View style={styles.profileSection}>
             <View style={styles.avatar}>
@@ -77,6 +76,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
