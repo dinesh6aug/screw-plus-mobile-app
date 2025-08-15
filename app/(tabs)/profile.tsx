@@ -99,7 +99,7 @@ export default function ProfileScreen() {
           {menuItems.map(renderMenuItem)}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/login')}>
           <LogOut size={20} color="#ff4757" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
