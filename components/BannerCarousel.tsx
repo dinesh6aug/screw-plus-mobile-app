@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Banner } from '@/types/product';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface BannerCarouselProps {
   banners: Banner[];
@@ -47,14 +47,14 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
             <View style={styles.bannerOverlay}>
               <Text style={styles.bannerTitle}>{banner.title}</Text>
               <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
-              <View style={styles.ctaButton}>
+              {banner.cta && (<View style={styles.ctaButton}>
                 <Text style={styles.ctaText}>{banner.cta}</Text>
-              </View>
+              </View>)}
             </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
-      
+
       <View style={styles.pagination}>
         {banners.map((_, index) => (
           <View

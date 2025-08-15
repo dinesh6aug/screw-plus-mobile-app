@@ -64,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <View style={styles.priceContainer}>
           <Text style={styles.price}>₹{product.price}</Text>
-          {product.originalPrice && (
+          {(product.originalPrice !== product.price) && (
             <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
           )}
         </View>

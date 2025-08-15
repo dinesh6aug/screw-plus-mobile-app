@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator
-} from 'react-native';
-import { X, Save } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Banner } from '@/types/product';
+import { Save, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  ImageBackground,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 interface BannerFormModalProps {
   visible: boolean;
@@ -27,7 +29,7 @@ export default function BannerFormModal({ visible, banner, onClose }: BannerForm
     title: '',
     subtitle: '',
     image: '',
-    cta: 'Shop Now'
+    cta: ''
   });
 
   useEffect(() => {
@@ -43,13 +45,13 @@ export default function BannerFormModal({ visible, banner, onClose }: BannerForm
         title: '',
         subtitle: '',
         image: '',
-        cta: 'Shop Now'
+        cta: ''
       });
     }
   }, [banner]);
 
   const handleSave = async () => {
-    if (!formData.title || !formData.subtitle || !formData.image || !formData.cta) {
+    if (!formData.image) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -88,8 +90,8 @@ export default function BannerFormModal({ visible, banner, onClose }: BannerForm
           <Text style={styles.title}>
             {banner ? 'Edit Banner' : 'Add Banner'}
           </Text>
-          <TouchableOpacity 
-            style={styles.saveButton} 
+          <TouchableOpacity
+            style={styles.saveButton}
             onPress={handleSave}
             disabled={loading}
           >
@@ -101,24 +103,26 @@ export default function BannerFormModal({ visible, banner, onClose }: BannerForm
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.form} contentContainerStyle={styles.formContent}>
+        <ScrollView style={styles.form} contentContainerStyle={styles.formContent} automaticallyAdjustKeyboardInsets>
           <View style={styles.field}>
-            <Text style={styles.label}>Title *</Text>
+            <Text style={styles.label}>Title</Text>
             <TextInput
               style={styles.input}
               value={formData.title}
               onChangeText={(text) => setFormData({ ...formData, title: text })}
               placeholder="e.g. New Collection, Summer Sale"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Subtitle *</Text>
+            <Text style={styles.label}>Subtitle</Text>
             <TextInput
               style={styles.input}
               value={formData.subtitle}
               onChangeText={(text) => setFormData({ ...formData, subtitle: text })}
               placeholder="e.g. Up to 50% Off, Fresh Styles"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -131,29 +135,59 @@ export default function BannerFormModal({ visible, banner, onClose }: BannerForm
               placeholder="https://example.com/banner-image.jpg"
               multiline
               numberOfLines={3}
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Call to Action *</Text>
+            <Text style={styles.label}>Call to Action</Text>
             <TextInput
               style={styles.input}
               value={formData.cta}
               onChangeText={(text) => setFormData({ ...formData, cta: text })}
               placeholder="e.g. Shop Now, Explore, Discover"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
-          <View style={styles.previewSection}>
-            <Text style={styles.previewTitle}>Preview</Text>
-            <View style={styles.previewCard}>
-              <Text style={styles.previewMainTitle}>{formData.title || 'Banner Title'}</Text>
-              <Text style={styles.previewSubtitle}>{formData.subtitle || 'Banner Subtitle'}</Text>
-              <View style={styles.previewButton}>
-                <Text style={styles.previewButtonText}>{formData.cta || 'Shop Now'}</Text>
+          {
+            (formData.image || formData.title || formData.subtitle || formData.cta) && (
+              <View style={styles.previewSection}>
+                <Text style={styles.previewTitle}>Preview</Text>
+
+                <ImageBackground
+                  source={{ uri: formData.image }}
+                  style={styles.previewCard}
+                  imageStyle={styles.backgroundImage}
+                  resizeMode="cover"
+                >
+                  {/* Overlay color */}
+                  <View style={styles.overlay} />
+
+                  {/* Content over image */}
+                  <View style={styles.previewContent}>
+                    {formData.title && (
+                      <Text style={styles.previewMainTitle}>
+                        {formData.title || 'Banner Title'}
+                      </Text>
+                    )}
+                    {formData.subtitle && (
+                      <Text style={styles.previewSubtitle}>
+                        {formData.subtitle || 'Banner Subtitle'}
+                      </Text>
+                    )}
+                    {formData.cta && (
+                      <View style={styles.previewButton}>
+                        <Text style={styles.previewButtonText}>
+                          {formData.cta || 'Shop Now'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </ImageBackground>
               </View>
-            </View>
-          </View>
+            )
+          }
         </ScrollView>
       </View>
     </Modal>
@@ -231,8 +265,22 @@ const styles = StyleSheet.create({
   previewCard: {
     backgroundColor: '#F59E0B',
     borderRadius: 12,
-    padding: 20,
+    height: 180,
+    overflow: 'hidden',
+    justifyContent: 'center',
     alignItems: 'center'
+  },
+  backgroundImage: {
+    borderRadius: 12,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // #F59E0B with opacity
+  },
+  previewContent: {
+    position: 'absolute',
+    padding: 16,
+    width: '100%',
   },
   previewMainTitle: {
     fontSize: 24,
@@ -251,7 +299,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8
+    borderRadius: 8,
+    alignSelf: 'center',
   },
   previewButtonText: {
     fontSize: 16,

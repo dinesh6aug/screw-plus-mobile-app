@@ -109,8 +109,13 @@ export default function ProductDetailScreen() {
 
           <View style={styles.ratingContainer}>
             <Star size={16} color="#ffa502" fill="#ffa502" />
-            <Text style={styles.rating}>{product.rating}</Text>
-            <Text style={styles.reviews}>({product.reviews} reviews)</Text>
+            <Text style={styles.rating}>
+              {product.rating}
+            </Text>
+
+            <Text style={styles.reviews}>
+              ({String(product.reviews)} reviews)
+            </Text>
           </View>
 
           <View style={styles.priceContainer}>

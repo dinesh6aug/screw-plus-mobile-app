@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Alert,
-  RefreshControl,
-  ActivityIndicator
-} from 'react-native';
-import { Plus, Edit3, Trash2, Image as ImageIcon } from 'lucide-react-native';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Banner } from '@/types/product';
+import { Edit3, Image as ImageIcon, Plus, Trash2 } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import BannerFormModal from './BannerFormModal';
 
 export default function BannersTab() {
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
   },
   bannerCard: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,

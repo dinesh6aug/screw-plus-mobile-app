@@ -2,7 +2,7 @@ import BannersTab from '@/components/admin/BannersTab';
 import CategoriesTab from '@/components/admin/CategoriesTab';
 import ProductsTab from '@/components/admin/ProductsTab';
 import StatsTab from '@/components/admin/StatsTab';
-import { BarChart3, Grid3X3, Image, Package, Settings } from 'lucide-react-native';
+import { BarChart3, Grid3X3, Image, Package } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Dimensions,
@@ -52,11 +52,11 @@ export default function AdminScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <Settings size={24} color="#1F2937" />
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={styles.headerSpacer} />
-      </View>
+      </View> */}
 
       <ScrollView 
         horizontal 

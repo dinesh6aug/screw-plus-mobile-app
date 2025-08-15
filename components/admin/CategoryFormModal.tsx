@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator
-} from 'react-native';
-import { X, Save } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Category } from '@/types/product';
+import { Save, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 interface CategoryFormModalProps {
   visible: boolean;
@@ -97,7 +98,7 @@ export default function CategoryFormModal({ visible, category, onClose }: Catego
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.form} contentContainerStyle={styles.formContent}>
+        <ScrollView style={styles.form} contentContainerStyle={styles.formContent} automaticallyAdjustKeyboardInsets>
           <View style={styles.field}>
             <Text style={styles.label}>Category Name *</Text>
             <TextInput
@@ -105,6 +106,7 @@ export default function CategoryFormModal({ visible, category, onClose }: Catego
               value={formData.name}
               onChangeText={(text) => setFormData({ ...formData, name: text })}
               placeholder="e.g. Men, Women, Accessories"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -117,6 +119,7 @@ export default function CategoryFormModal({ visible, category, onClose }: Catego
               placeholder="https://example.com/category-image.jpg"
               multiline
               numberOfLines={3}
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -128,6 +131,7 @@ export default function CategoryFormModal({ visible, category, onClose }: Catego
               onChangeText={(text) => setFormData({ ...formData, productCount: text })}
               placeholder="0"
               keyboardType="numeric"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
             <Text style={styles.fieldNote}>
               This will be automatically updated based on products in this category

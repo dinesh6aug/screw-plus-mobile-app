@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator
-} from 'react-native';
-import { X, Save } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Product } from '@/types/product';
+import { Save, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 interface ProductFormModalProps {
   visible: boolean;
@@ -29,7 +30,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
     originalPrice: '',
     image: '',
     category: '',
-    brand: 'Campus Sutra',
+    brand: '',
     rating: '4.5',
     reviews: '0',
     sizes: 'S,M,L,XL',
@@ -140,7 +141,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.form} contentContainerStyle={styles.formContent}>
+        <ScrollView style={styles.form} contentContainerStyle={styles.formContent} automaticallyAdjustKeyboardInsets>
           <View style={styles.field}>
             <Text style={styles.label}>Title *</Text>
             <TextInput
@@ -148,6 +149,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
               value={formData.title}
               onChangeText={(text) => setFormData({ ...formData, title: text })}
               placeholder="Product title"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -160,6 +162,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
                 onChangeText={(text) => setFormData({ ...formData, price: text })}
                 placeholder="999"
                 keyboardType="numeric"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
             <View style={[styles.field, { flex: 1, marginLeft: 8 }]}>
@@ -170,6 +173,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
                 onChangeText={(text) => setFormData({ ...formData, originalPrice: text })}
                 placeholder="1499"
                 keyboardType="numeric"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
           </View>
@@ -182,6 +186,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
               onChangeText={(text) => setFormData({ ...formData, image: text })}
               placeholder="https://example.com/image.jpg"
               multiline
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -215,6 +220,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
                 value={formData.brand}
                 onChangeText={(text) => setFormData({ ...formData, brand: text })}
                 placeholder="Brand name"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
           </View>
@@ -228,6 +234,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
                 onChangeText={(text) => setFormData({ ...formData, rating: text })}
                 placeholder="4.5"
                 keyboardType="numeric"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
             <View style={[styles.field, { flex: 1, marginLeft: 8 }]}>
@@ -238,6 +245,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
                 onChangeText={(text) => setFormData({ ...formData, reviews: text })}
                 placeholder="128"
                 keyboardType="numeric"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
           </View>
@@ -249,6 +257,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
               value={formData.sizes}
               onChangeText={(text) => setFormData({ ...formData, sizes: text })}
               placeholder="S,M,L,XL,XXL"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -259,6 +268,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
               value={formData.colors}
               onChangeText={(text) => setFormData({ ...formData, colors: text })}
               placeholder="White,Black,Navy,Red"
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 
@@ -271,6 +281,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
               placeholder="Product description"
               multiline
               numberOfLines={4}
+              placeholderTextColor={Colors.light.placeholderTextColor}
             />
           </View>
 

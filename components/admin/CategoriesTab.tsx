@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Alert,
-  RefreshControl,
-  ActivityIndicator
-} from 'react-native';
-import { Plus, Edit3, Trash2, Grid3X3 } from 'lucide-react-native';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Category } from '@/types/product';
+import { Edit3, Grid3X3, Plus, Trash2 } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import CategoryFormModal from './CategoryFormModal';
 
 export default function CategoriesTab() {
@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
