@@ -1,9 +1,14 @@
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/constants/products';
+import { Colors } from '@/constants/Colors';
+import { firebaseService } from '@/services/firebaseService'; // adjust path if needed
 import { useStore } from '@/store/useStore';
-import { Heart, ShoppingCart } from 'lucide-react-native';
-import React from 'react';
+import { Product } from '@/types/product';
+import { router } from 'expo-router';
+import { ArrowLeft, Heart, ShoppingCart } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
+    Alert,
     FlatList,
     StyleSheet,
     Text,
@@ -13,19 +18,39 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function WishlistScreen() {
-    const { favorites, addToCart } = useStore();
+    const { favorites, clearWishlist, addToCart } = useStore();
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Subscribe to real-time products
+        const unsubscribe = firebaseService.subscribeToProducts((fetchedProducts) => {
+            setProducts(fetchedProducts);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const wishlistProducts = products.filter(product => favorites.includes(product.id));
 
     const handleAddAllToCart = () => {
         wishlistProducts.forEach(product => {
-            if (product.sizes.length > 0 && product.colors.length > 0) {
-                addToCart(product, product.sizes[0], product.colors[0]);
-            }
+            const size = product.sizes?.[0] || "Default Size";
+            const color = product.colors?.[0] || "Default Color";
+            addToCart(product, size, color);
         });
+
+        Alert.alert(
+            "Success",
+            "All items have been added to your cart.",
+            [{ text: "OK" }]
+        );
+
+        clearWishlist(); // clear wishlist after success
     };
 
-    const renderProduct = ({ item }: { item: any }) => (
+    const renderProduct = ({ item }: { item: Product }) => (
         <View style={styles.productContainer}>
             <ProductCard product={item} />
         </View>
@@ -38,45 +63,61 @@ export default function WishlistScreen() {
             <Text style={styles.emptySubtitle}>
                 Add items you love to your wishlist and shop them later
             </Text>
-            <TouchableOpacity style={styles.shopNowButton}>
+            <TouchableOpacity style={styles.shopNowButton} onPress={() => router.replace('/(tabs)')}>
                 <Text style={styles.shopNowText}>Start Shopping</Text>
             </TouchableOpacity>
         </View>
     );
 
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <ActivityIndicator size="large" color="#333" style={{ flex: 1 }} />
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <SafeAreaView style={styles.container} edges={['left', 'right']}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>My Wishlist</Text>
-                {wishlistProducts.length > 0 && (
-                    <Text style={styles.itemCount}>{wishlistProducts.length} items</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <TouchableOpacity onPress={() => router.back()}>
+                            <ArrowLeft size={24} color={Colors.light.text} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>My Wishlist</Text>
+                    </View>
+                    {wishlistProducts.length > 0 && (
+                        <Text style={styles.itemCount}>{wishlistProducts.length} items</Text>
+                    )}
+                </View>
+
+                {wishlistProducts.length === 0 ? (
+                    renderEmptyWishlist()
+                ) : (
+                    <>
+                        <View style={styles.actionsContainer}>
+                            <TouchableOpacity
+                                style={styles.addAllButton}
+                                onPress={handleAddAllToCart}
+                            >
+                                <ShoppingCart size={20} color="#fff" />
+                                <Text style={styles.addAllText}>Add All to Cart</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <FlatList
+                            data={wishlistProducts}
+                            renderItem={renderProduct}
+                            numColumns={2}
+                            columnWrapperStyle={styles.row}
+                            contentContainerStyle={styles.productsContainer}
+                            showsVerticalScrollIndicator={false}
+                            keyExtractor={(item) => item.id}
+                        />
+                    </>
                 )}
             </View>
-
-            {wishlistProducts.length === 0 ? (
-                renderEmptyWishlist()
-            ) : (
-                <>
-                    <View style={styles.actionsContainer}>
-                        <TouchableOpacity
-                            style={styles.addAllButton}
-                            onPress={handleAddAllToCart}
-                        >
-                            <ShoppingCart size={20} color="#fff" />
-                            <Text style={styles.addAllText}>Add All to Cart</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <FlatList
-                        data={wishlistProducts}
-                        renderItem={renderProduct}
-                        numColumns={2}
-                        columnWrapperStyle={styles.row}
-                        contentContainerStyle={styles.productsContainer}
-                        showsVerticalScrollIndicator={false}
-                    />
-                </>
-            )}
         </SafeAreaView>
     );
 }

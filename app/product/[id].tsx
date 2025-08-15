@@ -1,21 +1,25 @@
+import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
-import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Heart, ShoppingCart, Star } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Heart, Share2, ShoppingCart, Star } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Dimensions,
   Image,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+const HEADER_HEIGHT = 300;
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -26,6 +30,9 @@ export default function ProductDetailScreen() {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (!id) return;
@@ -67,6 +74,18 @@ export default function ProductDetailScreen() {
     router.push('/cart');
   };
 
+  const handleShare = async () => {
+    try {
+      console.log('Sharing product:', product);
+      await Share.share({
+        message: `Check out this amazing product: ${product.title} - ₹${product.price}`,
+        url: product.image,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
@@ -83,21 +102,58 @@ export default function ProductDetailScreen() {
     );
   }
 
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_HEIGHT - 100],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#333" />
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Animated Header */}
+      <Animated.View style={[styles.animatedHeader, { opacity: headerOpacity, paddingTop: insets.top }]}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
+            <ArrowLeft size={24} color={Colors.light.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle} numberOfLines={1}>{product.name}</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.headerButton} onPress={() => toggleFavorite(product.id)}>
+              <Heart
+                size={24}
+                color={isFavorite ? 'red' : Colors.light.text}
+                fill={isFavorite ? 'red' : 'none'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton} onPress={handleShare}>
+              <Share2 size={24} color={Colors.light.text} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Animated.View>
+
+      {/* Floating Header Buttons */}
+      <View style={[styles.floatingHeader, { paddingTop: insets.top + 16 }]}>
+        <TouchableOpacity style={styles.floatingButton} onPress={() => router.back()}>
+          <ArrowLeft size={24} color={'#fff'} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => toggleFavorite(product.id)} style={styles.favoriteButton}>
-          <Heart
-            size={24}
-            color={isFavorite ? '#ff4757' : '#333'}
-            fill={isFavorite ? '#ff4757' : 'transparent'}
-          />
-        </TouchableOpacity>
+        <View style={styles.floatingActions}>
+          <TouchableOpacity style={styles.floatingButton} onPress={() => toggleFavorite(product.id)}>
+            <Heart
+              size={24}
+              color={isFavorite ? 'red' : '#fff'}
+              fill={isFavorite ? 'red' : '#fff'}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.floatingButton} onPress={handleShare}>
+            <Share2 size={24} color={'#fff'} />
+          </TouchableOpacity>
+        </View>
       </View>
+
 
       {/* Scrollable Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -363,5 +419,72 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
-  }
+  },
+
+  animatedHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fafafa',
+    zIndex: 1000,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dedede',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fafafa',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.light.text,
+    textAlign: 'center',
+    marginHorizontal: 16,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  floatingHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    zIndex: 999,
+  },
+  floatingButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'blur(10px)',
+  },
+  floatingActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
 });

@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -5,6 +6,7 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -12,7 +14,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -105,6 +107,7 @@ export default function LoginScreen() {
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 testID="email-input"
+                                placeholderTextColor={Colors.light.placeholderTextColor}
                             />
                         </View>
 
@@ -117,6 +120,7 @@ export default function LoginScreen() {
                                 onChangeText={setPassword}
                                 secureTextEntry={!showPassword}
                                 testID="password-input"
+                                placeholderTextColor={Colors.light.placeholderTextColor}
                             />
                             <TouchableOpacity
                                 onPress={() => setShowPassword(!showPassword)}
@@ -165,6 +169,14 @@ export default function LoginScreen() {
                             style={styles.socialButton}
                             testID="google-signin-button"
                         >
+                            <Image
+                                source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png' }}
+                                style={{
+                                    width: 20,
+                                    height: 20,
+                                    marginRight: 8,
+                                }}
+                            />
                             <Text style={styles.socialButtonText}>Continue with Google</Text>
                         </TouchableOpacity>
 
@@ -175,15 +187,23 @@ export default function LoginScreen() {
                                 style={[styles.socialButton, styles.appleButton]}
                                 testID="apple-signin-button"
                             >
+                                <Image
+                                    source={{ uri: 'https://pngimg.com/d/apple_logo_PNG19680.png' }}
+                                    style={{
+                                        width: 16,
+                                        height: 20,
+                                        marginRight: 8,
+                                    }}
+                                />
                                 <Text style={[styles.socialButtonText, styles.appleButtonText]}>
                                     Continue with Apple
                                 </Text>
                             </TouchableOpacity>
                         )}
 
-                        <TouchableOpacity onPress={handleSkipLogin} style={styles.skipButton}>
+                        {/* <TouchableOpacity onPress={handleSkipLogin} style={styles.skipButton}>
                             <Text style={styles.skipButtonText}>Skip for now</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     <View style={styles.footer}>
@@ -300,6 +320,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 12,
         backgroundColor: '#fff',
+        flexDirection: 'row',
+        justifyContent: 'center',
     },
     socialButtonText: {
         fontSize: 16,

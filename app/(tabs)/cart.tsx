@@ -1,5 +1,6 @@
 import { useStore } from '@/store/useStore';
 import { CartItem } from '@/types/product';
+import { router } from 'expo-router';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -105,7 +106,10 @@ export default function CartScreen() {
             <Text style={styles.totalAmount}>₹{getCartTotal()}</Text>
           </View>
 
-          <TouchableOpacity style={styles.checkoutButton}>
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={() => router.push('/checkout')}
+          >
             <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
           </TouchableOpacity>
         </View>

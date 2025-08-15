@@ -7,6 +7,7 @@ import * as WebBrowser from 'expo-web-browser';
 import {
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
+    OAuthProvider,
     onAuthStateChanged,
     sendPasswordResetEmail,
     signInWithCredential,
@@ -50,6 +51,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+    const [hasSkippedLogin, setHasSkippedLogin] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState('Select Location');
 
     const loadUserProfile = useCallback(async (uid: string) => {
@@ -57,11 +59,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
             const userDoc = await getDoc(doc(db, 'users', uid));
             if (userDoc.exists()) {
                 const data = userDoc.data();
-                setUserProfile({
+                const profile = {
                     ...data,
                     createdAt: data.createdAt?.toDate() || new Date(),
                     updatedAt: data.updatedAt?.toDate() || new Date(),
-                } as UserProfile);
+                } as UserProfile;
+                setUserProfile(profile);
+
+                if (data.selectedLocation) {
+                    setSelectedLocation(data.selectedLocation);
+                    await AsyncStorage.setItem('selectedLocation', data.selectedLocation);
+                }
             }
         } catch (error) {
             console.log('Error loading user profile:', error);
@@ -150,19 +158,29 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         try {
             setIsLoading(true);
 
-            const redirectUrl = AuthSession.makeRedirectUri();
+            const redirectUrl = AuthSession.makeRedirectUri({ scheme: 'screwplus', path: 'redirect' });
 
             const request = new AuthSession.AuthRequest({
-                clientId: '947363907554-your-google-client-id.apps.googleusercontent.com',
+                clientId: '947363907554-hiplrjvs4ahnsl8de9ug6fktt5oshl8v.apps.googleusercontent.com',
                 scopes: ['openid', 'profile', 'email'],
                 redirectUri: redirectUrl,
                 responseType: AuthSession.ResponseType.IdToken,
-                extraParams: {},
+                usePKCE: true,
+                extraParams: {
+                    prompt: 'consent',
+                    access_type: 'offline',
+                },
             });
 
-            const result = await request.promptAsync({
-                authorizationEndpoint: 'https://accounts.google.com/oauth/authorize',
-            });
+            const discovery = {
+                authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+                tokenEndpoint: 'https://oauth2.googleapis.com/token',
+                revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+            };
+
+            const result = await request.promptAsync(discovery);
+            console.log('Google sign in result:', result);
+
 
             if (result.type === 'success' && result.params.id_token) {
                 const credential = GoogleAuthProvider.credential(result.params.id_token);
@@ -203,12 +221,44 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
                 return { success: false, error: 'Apple Sign In is only available on iOS' };
             }
 
-            await AppleAuthentication.signInAsync({
+            const appleResult = await AppleAuthentication.signInAsync({
                 requestedScopes: [
                     AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
                     AppleAuthentication.AppleAuthenticationScope.EMAIL,
                 ],
             });
+
+            if (!appleResult.identityToken) {
+                return { success: false, error: 'No identity token returned' };
+            }
+
+            // Firebase me sign-in
+            // Firebase Apple OAuth
+            const provider = new OAuthProvider('apple.com');
+            const credential = provider.credential({
+                idToken: appleResult.identityToken,
+            });
+
+            const userCredential = await signInWithCredential(auth, credential);
+
+            // Firestore me profile check/create
+            const existingProfile = await getDoc(doc(db, 'users', userCredential.user.uid));
+
+            if (!existingProfile.exists()) {
+                const userProfile: UserProfile = {
+                    uid: userCredential.user.uid,
+                    email: userCredential.user.email || appleResult.email || '',
+                    displayName:
+                        userCredential.user.displayName ||
+                        `${appleResult.fullName?.givenName || ''} ${appleResult.fullName?.familyName || ''}`.trim() ||
+                        'User',
+                    photoURL: userCredential.user.photoURL || undefined,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
+
+                await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
+            }
 
             return { success: true };
         } catch (error: any) {
@@ -271,6 +321,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         try {
             await AsyncStorage.setItem('hasSkippedLogin', 'true');
             setHasCompletedOnboarding(true);
+            setHasSkippedLogin(true);
         } catch (error) {
             console.log('Error skipping login:', error);
         }
@@ -280,16 +331,24 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         try {
             await AsyncStorage.setItem('selectedLocation', location);
             setSelectedLocation(location);
+
+            if (user) {
+                await updateDoc(doc(db, 'users', user.uid), {
+                    selectedLocation: location,
+                    updatedAt: new Date(),
+                });
+            }
         } catch (error) {
             console.log('Error updating selected location:', error);
         }
-    }, []);
+    }, [user]);
 
     return useMemo(() => ({
         user,
         userProfile,
         isLoading,
         hasCompletedOnboarding,
+        hasSkippedLogin,
         selectedLocation,
         signUp,
         signIn,
@@ -306,6 +365,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         userProfile,
         isLoading,
         hasCompletedOnboarding,
+        hasSkippedLogin,
         selectedLocation,
         signUp,
         signIn,

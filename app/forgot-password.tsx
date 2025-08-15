@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -78,6 +79,7 @@ export default function ForgotPasswordScreen() {
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 testID="email-input"
+                                placeholderTextColor={Colors.light.placeholderTextColor}
                             />
                         </View>
 

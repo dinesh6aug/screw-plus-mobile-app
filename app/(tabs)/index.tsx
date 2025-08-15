@@ -1,10 +1,12 @@
 import BannerCarousel from '@/components/BannerCarousel';
 import CategoryCard from '@/components/CategoryCard';
+import LocationSelector from '@/components/LocationSelector';
 import ProductCard from '@/components/ProductCard';
+import { useAuth } from '@/store/useAuth';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { useStore } from '@/store/useStore';
 import { router } from 'expo-router';
-import { Bell, Search, ShoppingBag } from 'lucide-react-native';
+import { Bell, ChevronDown, MapPin, Search, ShoppingBag } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Animated, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const { getCartItemsCount } = useStore();
   const { products, categories, banners, loading } = useFirebaseData();
+  const { selectedLocation } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
   const featuredProducts = products.slice(0, 6);
   const newArrivals = products.filter(p => p.isNew).slice(0, 4);
   const bestSellers = products.filter(p => p.isBestseller).slice(0, 4);
@@ -35,8 +39,15 @@ export default function HomeScreen() {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
-        <Text style={styles.greeting}>Hello! 👋</Text>
-        <Text style={styles.welcomeText}>Welcome to Screw Plus</Text>
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={() => setShowLocationSelector(true)}
+        >
+          <MapPin size={16} color="#3742fa" />
+          <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{selectedLocation}</Text>
+          <ChevronDown size={16} color="#3742fa" />
+        </TouchableOpacity>
+        {/* <Text style={styles.welcomeText}>Welcome to Campus Sutra</Text> */}
       </View>
       <View style={styles.headerRight}>
         <TouchableOpacity
@@ -136,6 +147,11 @@ export default function HomeScreen() {
           </ScrollView>
         </Animated.View>
       </View>
+
+      <LocationSelector
+        visible={showLocationSelector}
+        onClose={() => setShowLocationSelector(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -159,16 +175,26 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e9ecef',
   },
   headerLeft: {
-    flex: 1,
+    flex: 0.9,
   },
-  greeting: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 2,
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f2ff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 4,
+    alignSelf: 'flex-start',
+  },
+  locationText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3742fa',
+    marginHorizontal: 6,
   },
   welcomeText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
   },
   headerRight: {

@@ -1,8 +1,11 @@
+import { useAuth } from '@/store/useAuth';
+import { useStore } from '@/store/useStore';
 import { router } from 'expo-router';
 import {
   Bell,
   ChevronRight,
   CreditCard,
+  Edit3,
   Heart,
   HelpCircle,
   LogOut,
@@ -12,11 +15,42 @@ import {
   ShoppingBag,
   User
 } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
+  const { user, userProfile, logout } = useAuth();
+  const { orders, wishlist } = useStore();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            setIsLoggingOut(true);
+            const result = await logout();
+            setIsLoggingOut(false);
+            if (result.success) {
+              router.replace('/login');
+            } else {
+              Alert.alert('Error', result.error || 'Failed to logout');
+            }
+          },
+        },
+      ],
+    );
+  };
+  
   const menuItems = [
     { icon: ShoppingBag, title: 'My Orders', subtitle: 'Track your orders', route: '/orders' },
     { icon: Heart, title: 'Wishlist', subtitle: 'Your favorite items', route: '/wishlist' },
@@ -68,29 +102,44 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <View style={styles.profileSection}>
             <View style={styles.avatar}>
-              <User size={32} color="#666" />
+              {userProfile?.photoURL ? (
+                <Image source={{ uri: userProfile.photoURL }} style={styles.avatarImage} />
+              ) : (
+                <User size={32} color="#666" />
+              )}
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.userName}>John Doe</Text>
-              <Text style={styles.userEmail}>john.doe@example.com</Text>
+              <Text style={styles.userName}>
+                {userProfile?.displayName || user?.displayName || 'Guest User'}
+              </Text>
+              <Text style={styles.userEmail}>
+                {userProfile?.email || user?.email || 'guest@example.com'}
+              </Text>
             </View>
+            <TouchableOpacity 
+              style={styles.editButton}
+              onPress={() => router.push('/edit-profile')}
+            >
+              <Edit3 size={20} color="#3742fa" />
+            </TouchableOpacity>
           </View>
         </View>
+        
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{orders.length}</Text>
             <Text style={styles.statLabel}>Orders</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statNumber}>{wishlist.length}</Text>
             <Text style={styles.statLabel}>Wishlist</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>₹15,420</Text>
+            <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.total, 0).toLocaleString()}</Text>
             <Text style={styles.statLabel}>Spent</Text>
           </View>
         </View>
@@ -99,9 +148,15 @@ export default function ProfileScreen() {
           {menuItems.map(renderMenuItem)}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/login')}>
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          disabled={isLoggingOut}
+        >
           <LogOut size={20} color="#ff4757" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.footer}>
@@ -128,6 +183,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  editButton: {
+    padding: 8,
+    backgroundColor: '#f0f2ff',
+    borderRadius: 20,
+  },
   avatar: {
     width: 64,
     height: 64,
@@ -137,6 +197,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#e9ecef',
+  },
+  avatarImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
   profileInfo: {
     marginLeft: 16,

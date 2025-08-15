@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
-    const { user, isLoading, hasCompletedOnboarding } = useAuth();
+    const { user, isLoading, hasCompletedOnboarding, hasSkippedLogin } = useAuth();
     const segments = useSegments();
 
     useEffect(() => {
@@ -13,14 +13,22 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
         const inOnboarding = segments[0] === 'onboarding';
         const inAuthScreens = ['login', 'signup', 'forgot-password'].includes(segments[0] as string);
 
-        console.log('Auth state:', { user: !!user, hasCompletedOnboarding, segments });
+        console.log('Auth state:', { user: !!user, hasCompletedOnboarding, segments, inAuthScreens });
 
         if (!hasCompletedOnboarding && !inOnboarding && !inAuthScreens) {
+            // Onboarding not complete → go to onboarding
             router.replace('/onboarding');
-        } else if (hasCompletedOnboarding && (inOnboarding || inAuthScreens)) {
+        }
+        else if (hasCompletedOnboarding && !user && !inAuthScreens) {
+            // Onboarding done but user not logged in → go to login
+            router.replace('/login');
+        }
+        else if (hasCompletedOnboarding && user && (inOnboarding || inAuthScreens)) {
+            // Onboarding done & user logged in but currently in auth screens → go to tabs
             router.replace('/(tabs)');
         }
     }, [user, isLoading, hasCompletedOnboarding, segments]);
+
 
     if (isLoading) {
         return (

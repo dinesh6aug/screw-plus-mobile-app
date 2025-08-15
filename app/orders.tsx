@@ -1,4 +1,6 @@
-import { CheckCircle, Clock, Package, Truck, XCircle } from 'lucide-react-native';
+import { useStore } from '@/store/useStore';
+import { router } from 'expo-router';
+import { CheckCircle, Clock, Package, ShoppingBag, Truck, XCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Animated,
@@ -11,88 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface Order {
-  id: string;
-  orderNumber: string;
-  date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  total: number;
-  items: {
-    id: string;
-    name: string;
-    image: string;
-    price: number;
-    quantity: number;
-    size: string;
-    color: string;
-  }[];
-}
 
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'CS2024001',
-    date: '2024-01-15',
-    status: 'delivered',
-    total: 2499,
-    items: [
-      {
-        id: '1',
-        name: 'Classic White T-Shirt',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
-        price: 1299,
-        quantity: 1,
-        size: 'M',
-        color: 'White'
-      },
-      {
-        id: '2',
-        name: 'Denim Jacket',
-        image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=400',
-        price: 1200,
-        quantity: 1,
-        size: 'L',
-        color: 'Blue'
-      }
-    ]
-  },
-  {
-    id: '2',
-    orderNumber: 'CS2024002',
-    date: '2024-01-20',
-    status: 'shipped',
-    total: 1899,
-    items: [
-      {
-        id: '3',
-        name: 'Casual Hoodie',
-        image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-        price: 1899,
-        quantity: 1,
-        size: 'XL',
-        color: 'Gray'
-      }
-    ]
-  },
-  {
-    id: '3',
-    orderNumber: 'CS2024003',
-    date: '2024-01-22',
-    status: 'processing',
-    total: 3299,
-    items: [
-      {
-        id: '4',
-        name: 'Premium Polo Shirt',
-        image: 'https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400',
-        price: 1649,
-        quantity: 2,
-        size: 'M',
-        color: 'Navy'
-      }
-    ]
-  }
-];
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -129,9 +50,10 @@ const getStatusColor = (status: string) => {
 };
 
 export default function OrdersScreen() {
+  const { orders } = useStore();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [animatedValues] = useState(() => 
-    mockOrders.reduce((acc, order) => {
+  const [animatedValues] = useState(() =>
+    orders.reduce((acc, order) => {
       acc[order.id] = new Animated.Value(0);
       return acc;
     }, {} as Record<string, Animated.Value>)
@@ -139,7 +61,7 @@ export default function OrdersScreen() {
 
   const toggleOrderExpansion = (orderId: string) => {
     const isExpanded = expandedOrder === orderId;
-    
+
     if (isExpanded) {
       Animated.timing(animatedValues[orderId], {
         toValue: 0,
@@ -156,24 +78,24 @@ export default function OrdersScreen() {
     }
   };
 
-  const renderOrderItem = (order: Order) => {
+  const renderOrderItem = (order: any) => {
     const isExpanded = expandedOrder === order.id;
-    const animatedHeight = animatedValues[order.id].interpolate({
+    const animatedHeight = animatedValues[order.id]?.interpolate({
       inputRange: [0, 1],
       outputRange: [0, order.items.length * 80 + 20],
-    });
+    }) || new Animated.Value(0);
 
     return (
       <View key={order.id} style={styles.orderCard}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.orderHeader}
           onPress={() => toggleOrderExpansion(order.id)}
         >
           <View style={styles.orderHeaderLeft}>
-            <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
-            <Text style={styles.orderDate}>{new Date(order.date).toLocaleDateString()}</Text>
+            <Text style={styles.orderNumber}>#CS{order.id}</Text>
+            <Text style={styles.orderDate}>{order.orderDate.toLocaleDateString()}</Text>
           </View>
-          
+
           <View style={styles.orderHeaderRight}>
             <View style={styles.statusContainer}>
               {getStatusIcon(order.status)}
@@ -181,18 +103,18 @@ export default function OrdersScreen() {
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </Text>
             </View>
-            <Text style={styles.orderTotal}>₹{order.total}</Text>
+            <Text style={styles.orderTotal}>₹{order.total.toLocaleString()}</Text>
           </View>
         </TouchableOpacity>
 
         <Animated.View style={[styles.orderItems, { height: animatedHeight }]}>
-          {order.items.map((item) => (
-            <View key={item.id} style={styles.orderItem}>
-              <Image source={{ uri: item.image }} style={styles.itemImage} />
+          {order.items.map((item: any, index: number) => (
+            <View key={index} style={styles.orderItem}>
+              <Image source={{ uri: item.product.image }} style={styles.itemImage} />
               <View style={styles.itemDetails}>
-                <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.itemVariant}>{item.size} • {item.color}</Text>
-                <Text style={styles.itemPrice}>₹{item.price} × {item.quantity}</Text>
+                <Text style={styles.itemName} numberOfLines={1}>{item.product.title}</Text>
+                <Text style={styles.itemVariant}>{item.selectedSize} • {item.selectedColor}</Text>
+                <Text style={styles.itemPrice}>₹{item.product.price} × {item.quantity}</Text>
               </View>
             </View>
           ))}
@@ -202,7 +124,7 @@ export default function OrdersScreen() {
           <TouchableOpacity style={styles.actionButton}>
             <Text style={styles.actionButtonText}>Track Order</Text>
           </TouchableOpacity>
-          
+
           {order.status === 'delivered' && (
             <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
               <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Reorder</Text>
@@ -213,16 +135,31 @@ export default function OrdersScreen() {
     );
   };
 
+  if (orders.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
+        <View style={styles.emptyContainer}>
+          <ShoppingBag size={64} color="#ccc" />
+          <Text style={styles.emptyTitle}>No orders yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Start shopping to see your orders here
+          </Text>
+          <TouchableOpacity
+            style={styles.shopButton}
+            onPress={() => router.replace('/(tabs)')}
+          >
+            <Text style={styles.shopButtonText}>Start Shopping</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>My Orders</Text>
-          <Text style={styles.headerSubtitle}>Track and manage your orders</Text>
-        </View>
-
         <View style={styles.ordersContainer}>
-          {mockOrders.map(renderOrderItem)}
+          {orders.map(renderOrderItem)}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -364,5 +301,35 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: '#333',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  shopButton: {
+    backgroundColor: '#3742fa',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  shopButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });

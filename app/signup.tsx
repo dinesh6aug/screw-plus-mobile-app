@@ -1,18 +1,19 @@
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -83,6 +84,7 @@ export default function SignUpScreen() {
                 onChangeText={setName}
                 autoCapitalize="words"
                 testID="name-input"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
 
@@ -97,6 +99,7 @@ export default function SignUpScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 testID="email-input"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
             </View>
 
@@ -109,6 +112,7 @@ export default function SignUpScreen() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 testID="password-input"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -131,6 +135,7 @@ export default function SignUpScreen() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
                 testID="confirm-password-input"
+                placeholderTextColor={Colors.light.placeholderTextColor}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
