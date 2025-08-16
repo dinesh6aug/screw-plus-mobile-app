@@ -6,6 +6,7 @@ import { CheckCircle, CreditCard, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function CheckoutScreen() {
     const { cart, getCartTotal, clearCart, addOrder } = useStore();
@@ -107,7 +108,7 @@ export default function CheckoutScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
             <View style={styles.container}>
-                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                <ScrollView style={styles.content} showsVerticalScrollIndicator={false} automaticallyAdjustKeyboardInsets>
                     {/* Order Summary */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Order Summary</Text>
@@ -180,6 +181,7 @@ export default function CheckoutScreen() {
                             value={orderNotes}
                             onChangeText={setOrderNotes}
                             multiline
+                            placeholderTextColor={Colors.light.placeholderTextColor}
                             numberOfLines={3}
                         />
                     </View>

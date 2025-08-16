@@ -1,16 +1,20 @@
 import ProductCard from '@/components/ProductCard';
+import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
+import { router } from 'expo-router';
+import { ShoppingCart } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CategoriesScreen() {
-  const { selectedCategory, setSelectedCategory } = useStore();
+  const { selectedCategory, setSelectedCategory, getCartItemsCount } = useStore();
   const [activeCategory, setActiveCategory] = useState(selectedCategory);
   const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const cartItemsCount = getCartItemsCount();
 
   // Fetch categories & products from Firebase
   useEffect(() => {
@@ -84,8 +88,23 @@ export default function CategoriesScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Categories</Text>
-          <Text style={styles.subtitle}>{filteredProducts.length} products found</Text>
+          <View>
+            <Text style={styles.title}>Categories</Text>
+            <Text style={styles.subtitle}>{filteredProducts.length} products found</Text>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[styles.headerButton, styles.cartButton]}
+              onPress={() => router.push('/cart')}
+            >
+              <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
+              {cartItemsCount > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         <FlatList
@@ -122,6 +141,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
@@ -132,6 +154,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  cartButton: {
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: '#ff4757',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   categoryFilters: {
     backgroundColor: '#fff',

@@ -80,9 +80,12 @@ export default function SearchScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
             <View style={styles.container}>
                 <View style={styles.searchContainer}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Text style={{ fontSize: 28, fontWeight: '600' }}>Search</Text>
-                    </View>
+                    {!isFocused && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                            <Text style={{ fontSize: 28, fontWeight: '600' }}>Search</Text>
+                        </View>
+                    )}
+
 
                     {/* Search bar + cancel */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>

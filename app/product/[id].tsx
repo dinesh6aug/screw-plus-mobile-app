@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Vibration,
   View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,6 +23,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HEADER_HEIGHT = 300;
 
 export default function ProductDetailScreen() {
+  const { getCartItemsCount } = useStore();
   const { id } = useLocalSearchParams();
   const { favorites, toggleFavorite, addToCart } = useStore();
 
@@ -34,6 +36,8 @@ export default function ProductDetailScreen() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
+
+  const cartItemsCount = getCartItemsCount();
 
   // Mock multiple images for slider
   const productImages = [
@@ -70,6 +74,7 @@ export default function ProductDetailScreen() {
       return;
     }
     addToCart(product, selectedSize, selectedColor);
+    Vibration.vibrate(500);
     alert('Added to cart!');
   };
 
@@ -132,14 +137,12 @@ export default function ProductDetailScreen() {
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <View style={styles.container}>
 
-        <Stack.Screen options={{ headerShown: false }} />
-
         {/* Animated Header */}
         <Animated.View style={[styles.animatedHeader, { opacity: headerOpacity, paddingTop: insets.top }]}>
           <View style={styles.headerContent}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
               <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={() => router.back()}>
-                <ArrowLeft size={24} color={'#000'} />
+                <ArrowLeft size={20} color={'#000'} />
               </TouchableOpacity>
               <View style={{ width: 200 }}>
                 <Text style={{ fontSize: 14, fontWeight: '500', marginBottom: 3 }} numberOfLines={1} ellipsizeMode='tail'>{product.title}</Text>
@@ -149,13 +152,13 @@ export default function ProductDetailScreen() {
             <View style={styles.floatingActions}>
               <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={() => toggleFavorite(product.id)}>
                 <Heart
-                  size={24}
+                  size={20}
                   color={isFavorite ? 'red' : '#000'}
                   fill={isFavorite ? 'red' : 'none'}
                 />
               </TouchableOpacity>
               <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={handleShare}>
-                <Share2 size={24} color={'#000'} />
+                <Share2 size={20} color={'#000'} />
               </TouchableOpacity>
             </View>
           </View>
@@ -164,18 +167,29 @@ export default function ProductDetailScreen() {
         {/* Floating Header Buttons */}
         <View style={[styles.floatingHeader, { paddingTop: insets.top + 12 }]}>
           <TouchableOpacity style={styles.floatingButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color={'#fff'} />
+            <ArrowLeft size={20} color={'#fff'} />
           </TouchableOpacity>
           <View style={styles.floatingActions}>
+            <TouchableOpacity
+              style={styles.floatingButton}
+              onPress={() => router.push('/cart')}
+            >
+              <ShoppingCart size={20} color={'#fff'} />
+              {cartItemsCount > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
             <TouchableOpacity style={styles.floatingButton} onPress={() => toggleFavorite(product.id)}>
               <Heart
-                size={24}
+                size={20}
                 color={'#fff'}
                 fill={isFavorite ? '#fff' : 'none'}
               />
             </TouchableOpacity>
             <TouchableOpacity style={styles.floatingButton} onPress={handleShare}>
-              <Share2 size={24} color={'#fff'} />
+              <Share2 size={20} color={'#fff'} />
             </TouchableOpacity>
           </View>
         </View>
@@ -316,7 +330,6 @@ export default function ProductDetailScreen() {
             )}
           </View>
 
-
         </Animated.ScrollView>
 
         {/* Footer */}
@@ -368,7 +381,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: '#fff',
+    backgroundColor: 'red',
     width: 24,
   },
   header: {
@@ -387,10 +400,25 @@ const styles = StyleSheet.create({
   favoriteButton: {
     padding: 8,
   },
-  // productImage: {
-  //   width,
-  //   height: width,
-  // },
+  cartButton: {
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: '#ff4757',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   content: {
     padding: 16,
   },
