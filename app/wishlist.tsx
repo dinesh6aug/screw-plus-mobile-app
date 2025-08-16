@@ -1,10 +1,9 @@
 import ProductCard from '@/components/ProductCard';
-import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService'; // adjust path if needed
 import { useStore } from '@/store/useStore';
 import { Product } from '@/types/product';
 import { router } from 'expo-router';
-import { ArrowLeft, Heart, ShoppingCart } from 'lucide-react-native';
+import { Heart, ShoppingCart } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -78,32 +77,24 @@ export default function WishlistScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <ArrowLeft size={24} color={Colors.light.text} />
-                        </TouchableOpacity>
-                        <Text style={styles.headerTitle}>My Wishlist</Text>
-                    </View>
-                    {wishlistProducts.length > 0 && (
-                        <Text style={styles.itemCount}>{wishlistProducts.length} items</Text>
-                    )}
-                </View>
 
                 {wishlistProducts.length === 0 ? (
                     renderEmptyWishlist()
                 ) : (
                     <>
-                        <View style={styles.actionsContainer}>
+                        <View style={[styles.actionsContainer, { flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
                             <TouchableOpacity
-                                style={styles.addAllButton}
+                                style={[styles.addAllButton, {flex: 1}]}
                                 onPress={handleAddAllToCart}
                             >
                                 <ShoppingCart size={20} color="#fff" />
                                 <Text style={styles.addAllText}>Add All to Cart</Text>
                             </TouchableOpacity>
+                            {wishlistProducts.length > 0 && (
+                                <Text style={styles.itemCount}>{wishlistProducts.length} items</Text>
+                            )}
                         </View>
 
                         <FlatList
@@ -148,6 +139,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
     },
     actionsContainer: {
         padding: 16,

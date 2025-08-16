@@ -22,15 +22,15 @@ function RootLayoutNav() {
         <Stack.Screen name="signup" options={{ headerShown: false }} />
         <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="product/[id]" options={{ headerShown: false, title: "Product Details" }} />
+        <Stack.Screen name="product/[id]" options={{ headerShown: false, title: "Product Details", presentation: "modal" }} />
         <Stack.Screen name="orders" options={{ headerShown: true, title: "My Orders" }} />
         <Stack.Screen name="addresses" options={{ headerShown: true, title: "Addresses" }} />
         <Stack.Screen name="payment-methods" options={{ headerShown: true, title: "Payment Methods" }} />
         <Stack.Screen name="notifications" options={{ headerShown: true, title: "Notifications" }} />
-        <Stack.Screen name="wishlist" options={{ headerShown: false, title: "Wishlist" }} />
+        <Stack.Screen name="wishlist" options={{ headerShown: true, title: "Wishlist" }} />
         <Stack.Screen name="settings" options={{ headerShown: true, title: "Settings" }} />
         <Stack.Screen name="admin" options={{ headerShown: true, title: "Admin Panel" }} />
-        <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-profile" options={{ headerShown: true, title: 'Edit Profile' }} />
         <Stack.Screen name="checkout" options={{ headerShown: false, title: "Checkout" }} />
       </Stack>
     </AuthWrapper>

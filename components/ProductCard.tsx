@@ -25,13 +25,13 @@ export default function ProductCard({ product }: ProductCardProps) {
     <TouchableOpacity style={styles.container} onPress={handlePress}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.image} />
-        <TouchableOpacity 
-          style={styles.favoriteButton} 
+        <TouchableOpacity
+          style={styles.favoriteButton}
           onPress={handleFavoritePress}
         >
-          <Heart 
-            size={20} 
-            color={isFavorite ? '#ff4757' : '#666'} 
+          <Heart
+            size={20}
+            color={isFavorite ? '#ff4757' : '#666'}
             fill={isFavorite ? '#ff4757' : 'transparent'}
           />
         </TouchableOpacity>
@@ -51,17 +51,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           </View>
         )}
       </View>
-      
+
       <View style={styles.content}>
         <Text style={styles.brand}>{product.brand}</Text>
         <Text style={styles.title} numberOfLines={2}>{product.title}</Text>
-        
+
         <View style={styles.ratingContainer}>
           <Star size={14} color="#ffa502" fill="#ffa502" />
           <Text style={styles.rating}>{product.rating}</Text>
           <Text style={styles.reviews}>({product.reviews})</Text>
         </View>
-        
+
         <View style={styles.priceContainer}>
           <Text style={styles.price}>₹{product.price}</Text>
           {(product.originalPrice !== product.price) && (

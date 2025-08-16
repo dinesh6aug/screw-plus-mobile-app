@@ -21,7 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { user, userProfile, logout } = useAuth();
-  const { orders, wishlist } = useStore();
+  const { orders, favorites } = useStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = () => {
@@ -134,7 +134,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{wishlist.length}</Text>
+            <Text style={styles.statNumber}>{favorites.length}</Text>
             <Text style={styles.statLabel}>Wishlist</Text>
           </View>
           <View style={styles.statDivider} />

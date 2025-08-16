@@ -72,7 +72,7 @@ const getAddressIcon = (type: string) => {
 
 export default function AddressesScreen() {
   const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
-  const [animatedValues] = useState(() => 
+  const [animatedValues] = useState(() =>
     mockAddresses.reduce((acc, address) => {
       acc[address.id] = new Animated.Value(1);
       return acc;
@@ -103,7 +103,7 @@ export default function AddressesScreen() {
   };
 
   const handleSetDefault = (addressId: string) => {
-    setAddresses(prev => 
+    setAddresses(prev =>
       prev.map(addr => ({
         ...addr,
         isDefault: addr.id === addressId,
@@ -137,12 +137,12 @@ export default function AddressesScreen() {
               </View>
             )}
           </View>
-          
+
           <View style={styles.addressActions}>
             <TouchableOpacity style={styles.actionButton}>
               <Edit3 size={16} color="#666" />
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => handleDeleteAddress(address.id)}
             >
@@ -161,7 +161,7 @@ export default function AddressesScreen() {
         </View>
 
         {!address.isDefault && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.setDefaultButton}
             onPress={() => handleSetDefault(address.id)}
           >
@@ -174,11 +174,11 @@ export default function AddressesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Delivery Addresses</Text>
+        <Text style={styles.headerSubtitle}>Manage your delivery locations</Text>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Delivery Addresses</Text>
-          <Text style={styles.headerSubtitle}>Manage your delivery locations</Text>
-        </View>
 
         <TouchableOpacity style={styles.addAddressButton}>
           <Plus size={20} color="#333" />

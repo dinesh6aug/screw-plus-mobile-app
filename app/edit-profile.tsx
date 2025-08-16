@@ -2,7 +2,6 @@ import { useAuth } from '@/store/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import {
-    ArrowLeft,
     Calendar,
     Mail,
     MapPin,
@@ -83,24 +82,12 @@ export default function EditProfileScreen() {
         }
     };
 
-    const handleBack = () => {
-        router.back();
-    };
-
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                        <ArrowLeft size={24} color="#333" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Edit Profile</Text>
-                    <View style={styles.placeholder} />
-                </View>
-
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <View style={styles.form}>
                         <View style={styles.inputContainer}>

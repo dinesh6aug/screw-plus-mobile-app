@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   shopButton: {
-    backgroundColor: '#3742fa',
+    backgroundColor: '#333',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

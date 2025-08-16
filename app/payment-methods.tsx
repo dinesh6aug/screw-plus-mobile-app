@@ -84,7 +84,7 @@ const getPaymentTypeColor = (type: string) => {
 
 export default function PaymentMethodsScreen() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods);
-  const [animatedValues] = useState(() => 
+  const [animatedValues] = useState(() =>
     mockPaymentMethods.reduce((acc, method) => {
       acc[method.id] = new Animated.Value(1);
       return acc;
@@ -115,7 +115,7 @@ export default function PaymentMethodsScreen() {
   };
 
   const handleSetDefault = (methodId: string) => {
-    setPaymentMethods(prev => 
+    setPaymentMethods(prev =>
       prev.map(method => ({
         ...method,
         isDefault: method.id === methodId,
@@ -150,14 +150,14 @@ export default function PaymentMethodsScreen() {
               )}
             </View>
           </View>
-          
+
           <View style={styles.paymentActions}>
             {method.isDefault && (
               <View style={styles.defaultBadge}>
                 <Text style={styles.defaultText}>Default</Text>
               </View>
             )}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => handleDeletePaymentMethod(method.id)}
             >
@@ -167,7 +167,7 @@ export default function PaymentMethodsScreen() {
         </View>
 
         {!method.isDefault && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.setDefaultButton}
             onPress={() => handleSetDefault(method.id)}
           >
@@ -181,7 +181,7 @@ export default function PaymentMethodsScreen() {
   const renderAddPaymentOptions = () => (
     <View style={styles.addPaymentSection}>
       <Text style={styles.sectionTitle}>Add Payment Method</Text>
-      
+
       <TouchableOpacity style={styles.addPaymentOption}>
         <View style={[styles.iconContainer, { backgroundColor: '#3742fa20' }]}>
           <CreditCard size={20} color="#3742fa" />
@@ -219,12 +219,11 @@ export default function PaymentMethodsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Payment Methods</Text>
+        <Text style={styles.headerSubtitle}>Manage your payment options</Text>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Payment Methods</Text>
-          <Text style={styles.headerSubtitle}>Manage your payment options</Text>
-        </View>
-
         <View style={styles.paymentMethodsContainer}>
           {paymentMethods.map(renderPaymentMethodCard)}
         </View>
