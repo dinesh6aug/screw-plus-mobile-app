@@ -1,6 +1,6 @@
 import { useStore } from "@/store/useStore";
 import { Tabs } from "expo-router";
-import { Grid3X3, Home, Search, ShoppingCart, User } from "lucide-react-native";
+import { Grid3X3, Home, Search, User } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -57,7 +57,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Search size={24} color={color} />,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="cart"
         options={{
           title: "Cart",
@@ -70,7 +70,7 @@ export default function TabLayout() {
             fontWeight: 'bold',
           },
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{

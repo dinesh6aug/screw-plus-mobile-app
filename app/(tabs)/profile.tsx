@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const { user, userProfile, logout } = useAuth();
   const { orders, favorites } = useStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -50,14 +50,14 @@ export default function ProfileScreen() {
       ],
     );
   };
-  
+
   const menuItems = [
+    { icon: Shield, title: 'Admin Panel', subtitle: 'Manage app content', route: '/admin', isAdmin: true },
     { icon: ShoppingBag, title: 'My Orders', subtitle: 'Track your orders', route: '/orders' },
     { icon: Heart, title: 'Wishlist', subtitle: 'Your favorite items', route: '/wishlist' },
     { icon: MapPin, title: 'Addresses', subtitle: 'Manage delivery addresses', route: '/addresses' },
     { icon: CreditCard, title: 'Payment Methods', subtitle: 'Cards & wallets', route: '/payment-methods' },
     { icon: Bell, title: 'Notifications', subtitle: 'Alerts & updates', route: '/notifications' },
-    { icon: Shield, title: 'Admin Panel', subtitle: 'Manage app content', route: '/admin', isAdmin: true },
     { icon: HelpCircle, title: 'Help & Support', subtitle: 'Get assistance', route: null },
     { icon: Settings, title: 'Settings', subtitle: 'App preferences', route: '/settings' },
   ];
@@ -71,10 +71,10 @@ export default function ProfileScreen() {
   const renderMenuItem = (item: any, index: number) => {
     const IconComponent = item.icon;
     const isAdminItem = item.isAdmin;
-    
+
     return (
-      <TouchableOpacity 
-        key={index} 
+      <TouchableOpacity
+        key={index}
         style={[styles.menuItem, isAdminItem && styles.adminMenuItem]}
         onPress={() => handleMenuPress(item.route)}
       >
@@ -99,32 +99,32 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-          <View style={styles.profileSection}>
-            <View style={styles.avatar}>
-              {userProfile?.photoURL ? (
-                <Image source={{ uri: userProfile.photoURL }} style={styles.avatarImage} />
-              ) : (
-                <User size={32} color="#666" />
-              )}
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.userName}>
-                {userProfile?.displayName || user?.displayName || 'Guest User'}
-              </Text>
-              <Text style={styles.userEmail}>
-                {userProfile?.email || user?.email || 'guest@example.com'}
-              </Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.editButton}
-              onPress={() => router.push('/edit-profile')}
-            >
-              <Edit3 size={20} color="#3742fa" />
-            </TouchableOpacity>
+      <View style={styles.header}>
+        <View style={styles.profileSection}>
+          <View style={styles.avatar}>
+            {userProfile?.photoURL ? (
+              <Image source={{ uri: userProfile.photoURL }} style={styles.avatarImage} />
+            ) : (
+              <User size={32} color="#666" />
+            )}
           </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>
+              {userProfile?.displayName || user?.displayName || 'Guest User'}
+            </Text>
+            <Text style={styles.userEmail}>
+              {userProfile?.email || user?.email || 'guest@example.com'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => router.push('/edit-profile')}
+          >
+            <Edit3 size={20} color="#3742fa" />
+          </TouchableOpacity>
         </View>
-        
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
 
         <View style={styles.statsContainer}>
@@ -148,7 +148,7 @@ export default function ProfileScreen() {
           {menuItems.map(renderMenuItem)}
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.logoutButton}
           onPress={handleLogout}
           disabled={isLoggingOut}
@@ -160,7 +160,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Campus Sutra v1.0.0</Text>
+          <Text style={styles.footerText}>Screw Plus v1.0.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

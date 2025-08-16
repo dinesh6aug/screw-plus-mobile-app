@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import {
     Calendar,
     Mail,
-    MapPin,
     Phone,
     Save,
     User
@@ -125,7 +124,7 @@ export default function EditProfileScreen() {
                             />
                         </View>
 
-                        <View style={styles.inputContainer}>
+                        {/* <View style={styles.inputContainer}>
                             <MapPin size={20} color="#666" style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
@@ -168,7 +167,7 @@ export default function EditProfileScreen() {
                                 keyboardType="numeric"
                                 testID="pincode-input"
                             />
-                        </View>
+                        </View> */}
 
                         <View style={styles.inputContainer}>
                             <Calendar size={20} color="#666" style={styles.inputIcon} />
@@ -213,7 +212,7 @@ export default function EditProfileScreen() {
                             testID="save-button"
                         >
                             <LinearGradient
-                                colors={['#667eea', '#764ba2']}
+                                colors={['#FF944D', '#FF6600', '#CC5200']}
                                 style={styles.saveButtonGradient}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
@@ -326,8 +325,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f9f9f9',
     },
     genderOptionSelected: {
-        borderColor: '#667eea',
-        backgroundColor: '#667eea',
+        borderColor: '#333',
+        backgroundColor: '#333',
     },
     genderOptionText: {
         fontSize: 14,

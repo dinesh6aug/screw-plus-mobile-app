@@ -2,13 +2,15 @@ import BannerCarousel from '@/components/BannerCarousel';
 import CategoryCard from '@/components/CategoryCard';
 import LocationSelector from '@/components/LocationSelector';
 import ProductCard from '@/components/ProductCard';
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { useStore } from '@/store/useStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Bell, ChevronDown, MapPin, Search, ShoppingBag } from 'lucide-react-native';
+import { Bell, ChevronDown, MapPin, Search, ShoppingCart } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Animated, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -43,30 +45,30 @@ export default function HomeScreen() {
           style={styles.locationButton}
           onPress={() => setShowLocationSelector(true)}
         >
-          <MapPin size={16} color="#3742fa" />
+          <MapPin size={16} color="#333" />
           <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{selectedLocation}</Text>
-          <ChevronDown size={16} color="#3742fa" />
+          <ChevronDown size={16} color="#333" />
         </TouchableOpacity>
-        {/* <Text style={styles.welcomeText}>Welcome to Campus Sutra</Text> */}
+        {/* <Text style={styles.welcomeText}>Welcome to Screw Plus</Text> */}
       </View>
       <View style={styles.headerRight}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/search')}
         >
-          <Search size={24} color="#333" />
+          <Search size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/notifications')}
         >
-          <Bell size={24} color="#333" />
+          <Bell size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.headerButton, styles.cartButton]}
           onPress={() => router.push('/cart')}
         >
-          <ShoppingBag size={24} color="#333" />
+          <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
           {cartItemsCount > 0 && (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
@@ -99,67 +101,76 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-      <View style={styles.container}>
-        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {renderHeader()}
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {loading.banners ? (
-              <View style={styles.loadingBanner}>
-                <Text style={styles.loadingText}>Loading banners...</Text>
-              </View>
-            ) : (
-              <BannerCarousel banners={banners} />
-            )}
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Shop by Category</Text>
-              {loading.categories ? (
-                <View style={styles.loadingContainer}>
-                  <Text style={styles.loadingText}>Loading categories...</Text>
+    <LinearGradient
+      // colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.middle, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
+      colors={['#6EE7B7', '#3AB7BF']}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}  // gradient start point
+      end={{ x: 1, y: 0 }}    // gradient end point
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top', 'left', 'right']}>
+        <StatusBar barStyle={'default'} />
+        <View style={styles.container}>
+          <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+            {renderHeader()}
+            <ScrollView style={{ flex: 1, backgroundColor: '#f8f9fa' }} showsVerticalScrollIndicator={false}>
+              {loading.banners ? (
+                <View style={styles.loadingBanner}>
+                  <Text style={styles.loadingText}>Loading banners...</Text>
                 </View>
               ) : (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.categoriesContainer}
-                >
-                  {categories.map((category) => (
-                    <CategoryCard key={category.id} category={category} />
-                  ))}
-                </ScrollView>
+                <BannerCarousel banners={banners} />
               )}
-            </View>
 
-            {loading.products ? (
-              <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Loading products...</Text>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Shop by Category</Text>
+                {loading.categories ? (
+                  <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>Loading categories...</Text>
+                  </View>
+                ) : (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.categoriesContainer}
+                  >
+                    {categories.map((category) => (
+                      <CategoryCard key={category.id} category={category} />
+                    ))}
+                  </ScrollView>
+                )}
               </View>
-            ) : (
-              <>
-                {newArrivals.length > 0 && renderSection('New Arrivals', newArrivals, true)}
-                {bestSellers.length > 0 && renderSection('Best Sellers', bestSellers, true)}
-                {renderSection('Featured Products', featuredProducts, true)}
-              </>
-            )}
 
-            <View style={styles.bottomSpacing} />
-          </ScrollView>
-        </Animated.View>
-      </View>
+              {loading.products ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Loading products...</Text>
+                </View>
+              ) : (
+                <>
+                  {newArrivals.length > 0 && renderSection('New Arrivals', newArrivals, true)}
+                  {bestSellers.length > 0 && renderSection('Best Sellers', bestSellers, true)}
+                  {renderSection('Featured Products', featuredProducts, true)}
+                </>
+              )}
 
-      <LocationSelector
-        visible={showLocationSelector}
-        onClose={() => setShowLocationSelector(false)}
-      />
-    </SafeAreaView>
+              <View style={styles.bottomSpacing} />
+            </ScrollView>
+          </Animated.View>
+        </View>
+
+        <LocationSelector
+          visible={showLocationSelector}
+          onClose={() => setShowLocationSelector(false)}
+        />
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
@@ -170,9 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    backgroundColor: 'transparent',
   },
   headerLeft: {
     flex: 0.9,
@@ -180,7 +189,7 @@ const styles = StyleSheet.create({
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f2ff',
+    backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -190,7 +199,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#3742fa',
+    color: '#333',
     marginHorizontal: 6,
   },
   welcomeText: {

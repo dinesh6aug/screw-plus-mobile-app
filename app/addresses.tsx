@@ -1,63 +1,11 @@
+import AddressModal from '@/components/AddressModal';
+import { firebaseService } from '@/services/firebaseService'; // 👈 apna service import karo
+import { formatAddress } from '@/services/utilityService';
+import Address from '@/types/types';
 import { Building, Edit3, Home, MapPin, Plus, Trash2 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import {
-  Alert,
-  Animated,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface Address {
-  id: string;
-  type: 'home' | 'work' | 'other';
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  phone: string;
-  isDefault: boolean;
-}
-
-const mockAddresses: Address[] = [
-  {
-    id: '1',
-    type: 'home',
-    name: 'John Doe',
-    address: '123 Main Street, Apartment 4B',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    pincode: '400001',
-    phone: '+91 9876543210',
-    isDefault: true,
-  },
-  {
-    id: '2',
-    type: 'work',
-    name: 'John Doe',
-    address: '456 Business Park, Floor 5',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    pincode: '400070',
-    phone: '+91 9876543210',
-    isDefault: false,
-  },
-  {
-    id: '3',
-    type: 'other',
-    name: 'Jane Doe',
-    address: '789 College Road, Near Metro Station',
-    city: 'Delhi',
-    state: 'Delhi',
-    pincode: '110001',
-    phone: '+91 9876543211',
-    isDefault: false,
-  },
-];
 
 const getAddressIcon = (type: string) => {
   switch (type) {
@@ -71,30 +19,48 @@ const getAddressIcon = (type: string) => {
 };
 
 export default function AddressesScreen() {
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
-  const [animatedValues] = useState(() =>
-    mockAddresses.reduce((acc, address) => {
-      acc[address.id] = new Animated.Value(1);
-      return acc;
-    }, {} as Record<string, Animated.Value>)
-  );
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const userId = "user_123"; // TODO: auth userId se replace karo
+
+  useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToAddresses(userId, (data) => {
+      setAddresses(data);
+      const values: Record<string, Animated.Value> = {};
+      data.forEach(addr => { values[addr.id] = new Animated.Value(1); });
+      setAnimatedValues(values);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSave = async (data: Omit<Address, "id">, id?: string) => {
+    if (id) {
+      await firebaseService.updateAddress(userId, id, data);
+    } else {
+      await firebaseService.addAddress(userId, data);
+    }
+    setModalVisible(false);
+    setEditingAddress(null);
+  };
 
   const handleDeleteAddress = (addressId: string) => {
     Alert.alert(
-      'Delete Address',
-      'Are you sure you want to delete this address?',
+      "Delete Address",
+      "Are you sure you want to delete this address?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
             Animated.timing(animatedValues[addressId], {
               toValue: 0,
               duration: 300,
               useNativeDriver: false,
-            }).start(() => {
-              setAddresses(prev => prev.filter(addr => addr.id !== addressId));
+            }).start(async () => {
+              await firebaseService.deleteAddress(userId, addressId);
             });
           },
         },
@@ -112,54 +78,36 @@ export default function AddressesScreen() {
   };
 
   const renderAddressCard = (address: Address) => {
-    const scaleValue = animatedValues[address.id];
+    const scaleValue = animatedValues[address.id] || new Animated.Value(1);
 
     return (
-      <Animated.View
-        key={address.id}
-        style={[
-          styles.addressCard,
-          {
-            transform: [{ scale: scaleValue }],
-            opacity: scaleValue,
-          },
-        ]}
-      >
+      <Animated.View key={address.id} style={[styles.addressCard, { transform: [{ scale: scaleValue }], opacity: scaleValue }]}>
         <View style={styles.addressHeader}>
           <View style={styles.addressTypeContainer}>
             {getAddressIcon(address.type)}
-            <Text style={styles.addressType}>
-              {address.type.charAt(0).toUpperCase() + address.type.slice(1)}
-            </Text>
+            <View style={{ flexDirection: 'column' }}>
+              <Text style={styles.addressType}>{address.type.charAt(0).toUpperCase() + address.type.slice(1)}</Text>
+              <Text style={[styles.addressType, { fontWeight: '500', fontSize: 13, color: '#666' }]}>({address.name})</Text>
+            </View>
+          </View>
+          <View style={[styles.addressActions, { flexDirection: 'row', alignItems: 'center' }]}>
             {address.isDefault && (
               <View style={styles.defaultBadge}>
                 <Text style={styles.defaultText}>Default</Text>
               </View>
             )}
-          </View>
-
-          <View style={styles.addressActions}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => { setEditingAddress(address); setModalVisible(true); }}>
               <Edit3 size={16} color="#666" />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => handleDeleteAddress(address.id)}
-            >
+            <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteAddress(address.id)}>
               <Trash2 size={16} color="#ff4757" />
             </TouchableOpacity>
           </View>
         </View>
-
         <View style={styles.addressContent}>
-          <Text style={styles.addressName}>{address.name}</Text>
-          <Text style={styles.addressText}>{address.address}</Text>
-          <Text style={styles.addressText}>
-            {address.city}, {address.state} - {address.pincode}
-          </Text>
-          <Text style={styles.addressPhone}>Phone: {address.phone}</Text>
+          <Text style={[styles.addressType, { fontWeight: '500', fontSize: 14, color: '#000' }]}>{formatAddress(address)}</Text>
         </View>
-
+        {/* ...rest as it is */}
         {!address.isDefault && (
           <TouchableOpacity
             style={styles.setDefaultButton}
@@ -173,30 +121,31 @@ export default function AddressesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Delivery Addresses</Text>
-        <Text style={styles.headerSubtitle}>Manage your delivery locations</Text>
-      </View>
-      <ScrollView showsVerticalScrollIndicator={false}>
-
-        <TouchableOpacity style={styles.addAddressButton}>
+    <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+      {/* header ... */}
+      <ScrollView style={styles.container}>
+        <TouchableOpacity style={styles.addAddressButton} onPress={() => { setEditingAddress(null); setModalVisible(true); }}>
           <Plus size={20} color="#333" />
           <Text style={styles.addAddressText}>Add New Address</Text>
         </TouchableOpacity>
-
-        <View style={styles.addressesContainer}>
-          {addresses.map(renderAddressCard)}
-        </View>
+        <View style={styles.addressesContainer}>{addresses.map(renderAddressCard)}</View>
       </ScrollView>
+
+      {/* 👇 Modal */}
+      <AddressModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={handleSave}
+        editingAddress={editingAddress}
+      />
     </SafeAreaView>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   header: {
     padding: 16,
@@ -274,11 +223,12 @@ const styles = StyleSheet.create({
   },
   defaultText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   addressActions: {
     flexDirection: 'row',
+    alignItems: 'flex-start'
   },
   actionButton: {
     padding: 8,

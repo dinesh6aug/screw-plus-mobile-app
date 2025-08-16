@@ -15,6 +15,12 @@ export const Colors = {
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
     placeholderTextColor: '#666',
+    homeScreenHeaderBackground: {
+      start: '#4c669f',
+      end: '#3b5998',
+      middle: '#192f6a',
+    },
+    homeScreenHeaderForeground: '#333',
   },
   dark: {
     text: '#ECEDEE',

@@ -90,7 +90,7 @@ export default function ForgotPasswordScreen() {
                             testID="reset-button"
                         >
                             <LinearGradient
-                                colors={['#667eea', '#764ba2']}
+                                colors={['#FF944D', '#FF6600', '#CC5200']}
                                 style={styles.resetButtonGradient}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}

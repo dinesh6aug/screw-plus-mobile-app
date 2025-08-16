@@ -84,13 +84,21 @@ export default function LoginScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <View style={styles.header}>
+                        <Image
+                            source={require('@/assets/images/new-logo-black.png')}
+                            style={{
+                                width: 220,
+                                height: 40,
+                                marginBottom: 20,
+                            }}
+                        />
                         <Text style={styles.title}>Welcome Back!</Text>
                         <Text style={styles.subtitle}>Sign in to continue shopping</Text>
                     </View>
@@ -145,7 +153,7 @@ export default function LoginScreen() {
                             testID="login-button"
                         >
                             <LinearGradient
-                                colors={['#667eea', '#764ba2']}
+                                colors={['#FF944D', '#FF6600', '#CC5200']}
                                 style={styles.loginButtonGradient}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
@@ -349,7 +357,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 24,
+        paddingTop: 24,
+        paddingBottom: 50
     },
     footerText: {
         fontSize: 16,

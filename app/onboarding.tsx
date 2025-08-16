@@ -28,10 +28,10 @@ const slides: OnboardingSlide[] = [
     {
         id: 1,
         title: 'Welcome to',
-        subtitle: 'Campus Sutra',
+        subtitle: 'Screw Plus',
         description: 'Discover the latest fashion trends and shop your favorite styles with ease.',
         icon: <ShoppingBag size={80} color="#fff" />,
-        gradient: ['#667eea', '#764ba2'],
+        gradient: ['#FF944D', '#CC5200'],
     },
     {
         id: 2,

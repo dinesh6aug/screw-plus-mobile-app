@@ -54,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <View style={styles.content}>
         <Text style={styles.brand}>{product.brand}</Text>
-        <Text style={styles.title} numberOfLines={2}>{product.title}</Text>
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode='tail'>{product.title}</Text>
 
         <View style={styles.ratingContainer}>
           <Star size={14} color="#ffa502" fill="#ffa502" />

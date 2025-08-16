@@ -1,5 +1,6 @@
 import { db } from '@/config/firebase';
 import { Banner, Category, Product } from '@/types/product';
+import Address from '@/types/types';
 import {
   addDoc,
   collection,
@@ -192,6 +193,46 @@ class FirebaseService {
       return null;
     }
   }
+
+  // Address
+
+  // inside FirebaseService class
+  async getAddresses(userId: string): Promise<Address[]> {
+    const addressesRef = collection(db, `users/${userId}/addresses`);
+    const snapshot = await getDocs(addressesRef);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Address[];
+  }
+
+  async addAddress(userId: string, address: Omit<Address, 'id'>): Promise<string> {
+    const addressesRef = collection(db, `users/${userId}/addresses`);
+    const docRef = await addDoc(addressesRef, address);
+    return docRef.id;
+  }
+
+  async updateAddress(userId: string, id: string, address: Partial<Address>): Promise<void> {
+    const addressRef = doc(db, `users/${userId}/addresses`, id);
+    await updateDoc(addressRef, address);
+  }
+
+  async deleteAddress(userId: string, id: string): Promise<void> {
+    const addressRef = doc(db, `users/${userId}/addresses`, id);
+    await deleteDoc(addressRef);
+  }
+
+  subscribeToAddresses(userId: string, callback: (addresses: Address[]) => void) {
+    const addressesRef = collection(db, `users/${userId}/addresses`);
+    return onSnapshot(addressesRef, (snapshot) => {
+      const addresses = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Address[];
+      callback(addresses);
+    });
+  }
+
 }
 
 export const firebaseService = new FirebaseService();

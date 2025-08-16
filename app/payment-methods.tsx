@@ -219,10 +219,6 @@ export default function PaymentMethodsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Payment Methods</Text>
-        <Text style={styles.headerSubtitle}>Manage your payment options</Text>
-      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.paymentMethodsContainer}>
           {paymentMethods.map(renderPaymentMethodCard)}

@@ -1,17 +1,21 @@
-// SearchScreen.tsx
 import ProductCard from '@/components/ProductCard';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
+import { useFocusEffect } from 'expo-router';
 import { Search as SearchIcon, X } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function SearchScreen() {
     const { searchQuery, setSearchQuery } = useStore();
     const [localQuery, setLocalQuery] = useState(searchQuery);
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const inputRef = useRef<TextInput>(null);
+    const [isFocused, setIsFocused] = useState(true);
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -28,6 +32,12 @@ export default function SearchScreen() {
 
         loadProducts();
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            handleFocus();
+        }, [])
+    );
 
     const filteredProducts = useMemo(() => {
         if (!localQuery.trim()) return [];
@@ -49,24 +59,62 @@ export default function SearchScreen() {
         </View>
     );
 
+    const handleFocus = () => {
+        inputRef.current?.focus();
+        setIsFocused(true);
+    };
+
+    const handleBlur = () => {
+        inputRef.current?.blur();
+        setIsFocused(false);
+    };
+
+    const handleCancel = () => {
+        handleSearchChange('');
+        setIsFocused(false);
+        inputRef.current?.blur();
+        Keyboard.dismiss();
+    };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
             <View style={styles.container}>
                 <View style={styles.searchContainer}>
-                    <View style={styles.searchInputContainer}>
-                        <SearchIcon size={20} color="#666" style={styles.searchIcon} />
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder="Search products..."
-                            value={localQuery}
-                            onChangeText={handleSearchChange}
-                            autoFocus
-                            placeholderTextColor={'#ccc'}
-                        />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <Text style={{ fontSize: 28, fontWeight: '600' }}>Search</Text>
+                    </View>
 
-                        {localQuery.length > 0 && (
-                            <TouchableOpacity onPress={() => handleSearchChange('')}>
-                                <X size={20} color="#666" style={{ marginLeft: 8 }} />
+                    {/* Search bar + cancel */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                        <View style={[styles.searchInputContainer, { width: isFocused ? '82%' : '100%' }]}>
+                            <SearchIcon size={20} color="#666" style={styles.searchIcon} />
+                            <TextInput
+                                ref={inputRef}
+                                style={styles.searchInput}
+                                placeholder="Search products..."
+                                value={localQuery}
+                                onChangeText={handleSearchChange}
+                                placeholderTextColor={Colors.light.placeholderTextColor}
+                                returnKeyLabel="Search"
+                                returnKeyType="search"
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
+                                enablesReturnKeyAutomatically
+                            />
+
+                            {localQuery.length > 0 && (
+                                <TouchableOpacity onPress={() => {
+                                    handleSearchChange('');
+                                    handleFocus();
+                                }}>
+                                    <X size={20} color="#666" style={{ marginLeft: 8 }} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+
+                        {isFocused && (
+                            <TouchableOpacity onPress={handleCancel}>
+                                <Text style={{ fontSize: 20, fontWeight: '500' }}>Cancel</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -107,7 +155,7 @@ export default function SearchScreen() {
                     </View>
                 )}
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 

@@ -2,7 +2,7 @@ import { sendOrderNotification } from '@/services/notificationService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
 import { router } from 'expo-router';
-import { ArrowLeft, CheckCircle, CreditCard, MapPin } from 'lucide-react-native';
+import { CheckCircle, CreditCard, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -88,38 +88,25 @@ export default function CheckoutScreen() {
 
     if (cart.length === 0) {
         return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <ArrowLeft size={24} color="#333" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Checkout</Text>
-                    <View style={{ width: 24 }} />
-                </View>
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Your cart is empty</Text>
-                    <TouchableOpacity
-                        style={styles.shopButton}
-                        onPress={() => router.replace('/(tabs)')}
-                    >
-                        <Text style={styles.shopButtonText}>Continue Shopping</Text>
-                    </TouchableOpacity>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
+                <View style={styles.container}>
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>Your cart is empty</Text>
+                        <TouchableOpacity
+                            style={styles.shopButton}
+                            onPress={() => router.replace('/(tabs)')}
+                        >
+                            <Text style={styles.shopButtonText}>Continue Shopping</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <ArrowLeft size={24} color="#333" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Checkout</Text>
-                    <View style={{ width: 24 }} />
-                </View>
-
                 <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                     {/* Order Summary */}
                     <View style={styles.section}>
@@ -323,7 +310,7 @@ const styles = StyleSheet.create({
     selectedOption: {
         backgroundColor: '#e8f2ff',
         borderWidth: 1,
-        borderColor: '#3742fa',
+        borderColor: '#333',
     },
     radioButton: {
         width: 20,
@@ -339,7 +326,7 @@ const styles = StyleSheet.create({
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: '#3742fa',
+        backgroundColor: '#333',
     },
     addressText: {
         fontSize: 14,
@@ -363,6 +350,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#333',
         textAlignVertical: 'top',
+        marginTop: 8,
     },
     priceRow: {
         flexDirection: 'row',
@@ -406,7 +394,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#3742fa',
+        backgroundColor: '#333',
         paddingVertical: 16,
         borderRadius: 12,
     },
@@ -431,7 +419,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     shopButton: {
-        backgroundColor: '#3742fa',
+        backgroundColor: '#333',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 8,

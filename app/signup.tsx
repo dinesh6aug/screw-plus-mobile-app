@@ -63,7 +63,7 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -156,7 +156,7 @@ export default function SignUpScreen() {
               testID="signup-button"
             >
               <LinearGradient
-                colors={['#667eea', '#764ba2']}
+                colors={['#FF944D', '#FF6600', '#CC5200']}
                 style={styles.signUpButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -267,7 +267,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingTop: 24,
+    paddingBottom: 50
   },
   footerText: {
     fontSize: 16,

@@ -64,12 +64,8 @@ export default function CartScreen() {
 
   if (cart.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
         <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Shopping Cart</Text>
-          </View>
-
           <View style={styles.emptyContainer}>
             <ShoppingBag size={64} color="#ccc" />
             <Text style={styles.emptyTitle}>Your cart is empty</Text>
@@ -83,10 +79,14 @@ export default function CartScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Shopping Cart</Text>
+          {cart.length > 0 && (
+            <Text style={styles.itemCount}>
+              {cart.length} {cart.length === 1 ? "item" : "items"}
+            </Text>
+          )}
           <TouchableOpacity onPress={clearCart}>
             <Text style={styles.clearButton}>Clear All</Text>
           </TouchableOpacity>
@@ -134,9 +134,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e9ecef',
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
+  },
+  itemCount: {
+    fontSize: 14,
+    color: '#666',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
   clearButton: {
     fontSize: 14,
@@ -227,7 +237,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: '#fff',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 28,
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
   },

@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HEADER_HEIGHT = 300;
 
 export default function ProductDetailScreen() {
@@ -31,8 +31,16 @@ export default function ProductDetailScreen() {
   const [selectedColor, setSelectedColor] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
+
+  // Mock multiple images for slider
+  const productImages = [
+    product?.image || '',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
+  ];
 
   useEffect(() => {
     if (!id) return;
@@ -108,153 +116,219 @@ export default function ProductDetailScreen() {
     extrapolate: 'clamp',
   });
 
+  const imageTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_HEIGHT],
+    outputRange: [0, -HEADER_HEIGHT * 0.3],
+    extrapolate: 'clamp',
+  });
+
+  const imageScale = scrollY.interpolate({
+    inputRange: [-100, 0],
+    outputRange: [1.2, 1],
+    extrapolate: 'clamp',
+  });
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <View style={styles.container}>
 
-      <Stack.Screen options={{ headerShown: false }} />
+        <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Animated Header */}
-      <Animated.View style={[styles.animatedHeader, { opacity: headerOpacity, paddingTop: insets.top }]}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color={Colors.light.text} />
+        {/* Animated Header */}
+        <Animated.View style={[styles.animatedHeader, { opacity: headerOpacity, paddingTop: insets.top }]}>
+          <View style={styles.headerContent}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+              <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={() => router.back()}>
+                <ArrowLeft size={24} color={'#000'} />
+              </TouchableOpacity>
+              <View style={{ width: 200 }}>
+                <Text style={{ fontSize: 14, fontWeight: '500', marginBottom: 3 }} numberOfLines={1} ellipsizeMode='tail'>{product.title}</Text>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: 'green' }}>₹{product.price}</Text>
+              </View>
+            </View>
+            <View style={styles.floatingActions}>
+              <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={() => toggleFavorite(product.id)}>
+                <Heart
+                  size={24}
+                  color={isFavorite ? 'red' : '#000'}
+                  fill={isFavorite ? 'red' : 'none'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.floatingButton, { backgroundColor: 'transparent' }]} onPress={handleShare}>
+                <Share2 size={24} color={'#000'} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Floating Header Buttons */}
+        <View style={[styles.floatingHeader, { paddingTop: insets.top + 12 }]}>
+          <TouchableOpacity style={styles.floatingButton} onPress={() => router.back()}>
+            <ArrowLeft size={24} color={'#fff'} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1}>{product.name}</Text>
-          <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.headerButton} onPress={() => toggleFavorite(product.id)}>
+          <View style={styles.floatingActions}>
+            <TouchableOpacity style={styles.floatingButton} onPress={() => toggleFavorite(product.id)}>
               <Heart
                 size={24}
-                color={isFavorite ? 'red' : Colors.light.text}
-                fill={isFavorite ? 'red' : 'none'}
+                color={'#fff'}
+                fill={isFavorite ? '#fff' : 'none'}
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerButton} onPress={handleShare}>
-              <Share2 size={24} color={Colors.light.text} />
+            <TouchableOpacity style={styles.floatingButton} onPress={handleShare}>
+              <Share2 size={24} color={'#fff'} />
             </TouchableOpacity>
           </View>
         </View>
-      </Animated.View>
 
-      {/* Floating Header Buttons */}
-      <View style={[styles.floatingHeader, { paddingTop: insets.top + 16 }]}>
-        <TouchableOpacity style={styles.floatingButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color={'#fff'} />
-        </TouchableOpacity>
-        <View style={styles.floatingActions}>
-          <TouchableOpacity style={styles.floatingButton} onPress={() => toggleFavorite(product.id)}>
-            <Heart
-              size={24}
-              color={isFavorite ? 'red' : '#fff'}
-              fill={isFavorite ? 'red' : '#fff'}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.floatingButton} onPress={handleShare}>
-            <Share2 size={24} color={'#fff'} />
-          </TouchableOpacity>
-        </View>
-      </View>
+        <Animated.ScrollView
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
+        >
+          {/* Parallax Image Slider */}
+          <View style={styles.imageContainer}>
+            <Animated.View
+              style={[
+                styles.imageSliderContainer,
+                {
+                  transform: [
+                    { translateY: imageTranslateY },
+                    { scale: imageScale },
+                  ],
+                },
+              ]}
+            >
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={(event) => {
+                  const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+                  setCurrentImageIndex(index);
+                }}
+              >
+                {productImages.map((image, index) => (
+                  <Image key={index} source={{ uri: image }} style={styles.productImage} />
+                ))}
+              </ScrollView>
 
-
-      {/* Scrollable Content */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Image source={{ uri: product.image }} style={styles.productImage} />
-
-        <View style={styles.content}>
-          <Text style={styles.brand}>{product.brand}</Text>
-          <Text style={styles.title}>{product.title}</Text>
-
-          <View style={styles.ratingContainer}>
-            <Star size={16} color="#ffa502" fill="#ffa502" />
-            <Text style={styles.rating}>
-              {product.rating}
-            </Text>
-
-            <Text style={styles.reviews}>
-              ({String(product.reviews)} reviews)
-            </Text>
-          </View>
-
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>₹{product.price}</Text>
-            {product.originalPrice && (
-              <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
-            )}
-            {product.discount && (
-              <Text style={styles.discount}>{product.discount}% OFF</Text>
-            )}
-          </View>
-
-          {/* Sizes */}
-          {product.sizes?.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Size</Text>
-              <View style={styles.optionsContainer}>
-                {product.sizes.map((size: any) => (
-                  <TouchableOpacity
-                    key={size}
+              {/* Image Indicators */}
+              <View style={styles.imageIndicators}>
+                {productImages.map((_, index) => (
+                  <View
+                    key={index}
                     style={[
-                      styles.optionButton,
-                      selectedSize === size && styles.optionButtonSelected
+                      styles.indicator,
+                      index === currentImageIndex && styles.activeIndicator,
                     ]}
-                    onPress={() => setSelectedSize(size)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      selectedSize === size && styles.optionTextSelected
-                    ]}>
-                      {size}
-                    </Text>
-                  </TouchableOpacity>
+                  />
                 ))}
               </View>
-            </View>
-          )}
+            </Animated.View>
+          </View>
 
-          {/* Colors */}
-          {product.colors?.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Color</Text>
-              <View style={styles.optionsContainer}>
-                {product.colors.map((color: any) => (
-                  <TouchableOpacity
-                    key={color}
-                    style={[
-                      styles.optionButton,
-                      selectedColor === color && styles.optionButtonSelected
-                    ]}
-                    onPress={() => setSelectedColor(color)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      selectedColor === color && styles.optionTextSelected
-                    ]}>
-                      {color}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+          <View style={styles.content}>
+            <Text style={styles.brand}>{product.brand}</Text>
+            <Text style={styles.title}>{product.title}</Text>
+
+            <View style={styles.ratingContainer}>
+              <Star size={16} color="#ffa502" fill="#ffa502" />
+              <Text style={styles.rating}>
+                {product.rating}
+              </Text>
+
+              <Text style={styles.reviews}>
+                ({String(product.reviews)} reviews)
+              </Text>
+            </View>
+
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>₹{product.price}</Text>
+              {product.originalPrice && (
+                <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
+              )}
+              {product.discount && (
+                <Text style={styles.discount}>{product.discount}% OFF</Text>
+              )}
+            </View>
+
+            {/* Sizes */}
+            {product.sizes?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Size</Text>
+                <View style={styles.optionsContainer}>
+                  {product.sizes.map((size: any) => (
+                    <TouchableOpacity
+                      key={size}
+                      style={[
+                        styles.optionButton,
+                        selectedSize === size && styles.optionButtonSelected
+                      ]}
+                      onPress={() => setSelectedSize(size)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        selectedSize === size && styles.optionTextSelected
+                      ]}>
+                        {size}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-          {/* Description */}
-          {product.description && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.description}>{product.description}</Text>
-            </View>
-          )}
+            {/* Colors */}
+            {product.colors?.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Color</Text>
+                <View style={styles.optionsContainer}>
+                  {product.colors.map((color: any) => (
+                    <TouchableOpacity
+                      key={color}
+                      style={[
+                        styles.optionButton,
+                        selectedColor === color && styles.optionButtonSelected
+                      ]}
+                      onPress={() => setSelectedColor(color)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        selectedColor === color && styles.optionTextSelected
+                      ]}>
+                        {color}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Description */}
+            {product.description && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Description</Text>
+                <Text style={styles.description}>{product.description}</Text>
+              </View>
+            )}
+          </View>
+
+
+        </Animated.ScrollView>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
+            <ShoppingCart size={20} color="#333" />
+            <Text style={styles.addToCartText}>Add to Cart</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
+            <Text style={styles.buyNowText}>Buy Now</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
-          <ShoppingCart size={20} color="#333" />
-          <Text style={styles.addToCartText}>Add to Cart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
-          <Text style={styles.buyNowText}>Buy Now</Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -264,6 +338,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  imageContainer: {
+    height: HEADER_HEIGHT,
+    overflow: 'hidden',
+  },
+  imageSliderContainer: {
+    height: HEADER_HEIGHT + 100,
+  },
+  productImage: {
+    width: SCREEN_WIDTH,
+    height: HEADER_HEIGHT + 100,
+    resizeMode: 'cover',
+  },
+  imageIndicators: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    backgroundColor: '#fff',
+    width: 24,
   },
   header: {
     flexDirection: 'row',
@@ -281,10 +387,10 @@ const styles = StyleSheet.create({
   favoriteButton: {
     padding: 8,
   },
-  productImage: {
-    width,
-    height: width,
-  },
+  // productImage: {
+  //   width,
+  //   height: width,
+  // },
   content: {
     padding: 16,
   },
@@ -379,7 +485,8 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 28,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
@@ -487,4 +594,95 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+
+
+  // New
+  productName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.light.text,
+    marginBottom: 12,
+    lineHeight: 34,
+  },
+  discountBadge: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginLeft: 12,
+  },
+  discountText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  specRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  specKey: {
+    fontSize: 16,
+    color: Colors.light.text,
+    fontWeight: '500',
+  },
+  specValue: {
+    fontSize: 16,
+    color: '#94A3B8',
+  },
+  featuresList: {
+    marginTop: 8,
+  },
+  featureItem: {
+    fontSize: 16,
+    color: Colors.light.text,
+    lineHeight: 24,
+    marginBottom: 4,
+  },
+  deliveryInfo: {
+    marginTop: 8,
+  },
+  deliveryText: {
+    fontSize: 16,
+    color: Colors.light.text,
+    lineHeight: 24,
+    marginBottom: 4,
+  },
+  policyText: {
+    fontSize: 16,
+    color: Colors.light.text,
+    lineHeight: 24,
+    marginTop: 8,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 16,
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: '#dedede',
+  },
+  quantityButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+  },
+  quantityButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.light.text,
+  },
+  quantity: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.light.text,
+    marginHorizontal: 20,
+    minWidth: 30,
+    textAlign: 'center',
+  },
+
+
 });

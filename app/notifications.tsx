@@ -65,7 +65,7 @@ const mockNotifications: Notification[] = [
   {
     id: '5',
     type: 'general',
-    title: 'Welcome to Campus Sutra!',
+    title: 'Welcome to Screw Plus!',
     message: 'Thank you for joining us. Explore our latest collection and enjoy shopping!',
     time: '1 week ago',
     isRead: true,

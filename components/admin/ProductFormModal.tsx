@@ -64,7 +64,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
         originalPrice: '',
         image: '',
         category: categories[0]?.name || '',
-        brand: 'Campus Sutra',
+        brand: 'Screw Plus',
         rating: '4.5',
         reviews: '0',
         sizes: 'S,M,L,XL',

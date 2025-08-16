@@ -6,13 +6,13 @@ import { BarChart3, Grid3X3, Image, Package } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Dimensions,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -51,15 +51,9 @@ export default function AdminScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* <View style={styles.header}>
-        <Settings size={24} color="#1F2937" />
-        <Text style={styles.headerTitle}>Admin Panel</Text>
-        <View style={styles.headerSpacer} />
-      </View> */}
-
-      <ScrollView 
-        horizontal 
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.tabsContainer}
         contentContainerStyle={styles.tabsContent}
@@ -67,7 +61,7 @@ export default function AdminScreen() {
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
           const isActive = activeTab === tab.id;
-          
+
           return (
             <TouchableOpacity
               key={tab.id}
@@ -77,9 +71,9 @@ export default function AdminScreen() {
               ]}
               onPress={() => setActiveTab(tab.id)}
             >
-              <IconComponent 
-                size={20} 
-                color={isActive ? '#FFFFFF' : tab.color} 
+              <IconComponent
+                size={20}
+                color={isActive ? '#FFFFFF' : tab.color}
               />
               <Text style={[
                 styles.tabText,
