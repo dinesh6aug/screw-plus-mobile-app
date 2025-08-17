@@ -1,5 +1,7 @@
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import {
   Bell,
@@ -98,72 +100,79 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <View style={styles.profileSection}>
-          <View style={styles.avatar}>
-            {userProfile?.photoURL ? (
-              <Image source={{ uri: userProfile.photoURL }} style={styles.avatarImage} />
-            ) : (
-              <User size={32} color="#666" />
-            )}
+    <LinearGradient
+      colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
+      style={{ flex: 1 }}
+      start={{ x: 0, y: 0 }}  // gradient start point
+      end={{ x: 1, y: 0 }}    // gradient end point
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top', 'left', 'right']}>
+        <View style={styles.header}>
+          <View style={styles.profileSection}>
+            <View style={styles.avatar}>
+              {userProfile?.photoURL ? (
+                <Image source={{ uri: userProfile.photoURL }} style={styles.avatarImage} />
+              ) : (
+                <User size={28} color="#666" />
+              )}
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.userName}>
+                {userProfile?.displayName || user?.displayName || 'Guest User'}
+              </Text>
+              <Text style={styles.userEmail}>
+                {userProfile?.email || user?.email || 'guest@example.com'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push('/edit-profile')}
+            >
+              <Edit3 size={20} color="#3742fa" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.userName}>
-              {userProfile?.displayName || user?.displayName || 'Guest User'}
-            </Text>
-            <Text style={styles.userEmail}>
-              {userProfile?.email || user?.email || 'guest@example.com'}
-            </Text>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{orders.length}</Text>
+              <Text style={styles.statLabel}>Orders</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{favorites.length}</Text>
+              <Text style={styles.statLabel}>Wishlist</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.total, 0).toLocaleString()}</Text>
+              <Text style={styles.statLabel}>Spent</Text>
+            </View>
           </View>
+
+          <View style={styles.menuContainer}>
+            {menuItems.map(renderMenuItem)}
+          </View>
+
           <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => router.push('/edit-profile')}
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            disabled={isLoggingOut}
           >
-            <Edit3 size={20} color="#3742fa" />
+            <LogOut size={20} color="#ff4757" />
+            <Text style={styles.logoutText}>
+              {isLoggingOut ? 'Logging out...' : 'Logout'}
+            </Text>
           </TouchableOpacity>
-        </View>
-      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{orders.length}</Text>
-            <Text style={styles.statLabel}>Orders</Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Screw Plus v1.0.0</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{favorites.length}</Text>
-            <Text style={styles.statLabel}>Wishlist</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.total, 0).toLocaleString()}</Text>
-            <Text style={styles.statLabel}>Spent</Text>
-          </View>
-        </View>
-
-        <View style={styles.menuContainer}>
-          {menuItems.map(renderMenuItem)}
-        </View>
-
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          disabled={isLoggingOut}
-        >
-          <LogOut size={20} color="#ff4757" />
-          <Text style={styles.logoutText}>
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Screw Plus v1.0.0</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -173,9 +182,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingTop: 4,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
@@ -189,8 +199,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   avatar: {
-    width: 64,
-    height: 64,
+    width: 50,
+    height: 50,
     borderRadius: 32,
     backgroundColor: '#f8f9fa',
     justifyContent: 'center',
@@ -199,8 +209,8 @@ const styles = StyleSheet.create({
     borderColor: '#e9ecef',
   },
   avatarImage: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
   },
   profileInfo: {
@@ -210,12 +220,13 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.light.homeScreenHeaderForeground,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.light.homeScreenHeaderForeground,
+    opacity: 0.8,
   },
   statsContainer: {
     flexDirection: 'row',

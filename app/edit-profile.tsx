@@ -1,8 +1,10 @@
+import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import {
     Calendar,
+    CheckCircle,
     Mail,
     Phone,
     Save,
@@ -192,6 +194,7 @@ export default function EditProfileScreen() {
                                             gender === option && styles.genderOptionSelected,
                                         ]}
                                     >
+                                        {gender === option && (<CheckCircle size={16} color="#fff" />)}
                                         <Text
                                             style={[
                                                 styles.genderOptionText,
@@ -212,12 +215,12 @@ export default function EditProfileScreen() {
                             testID="save-button"
                         >
                             <LinearGradient
-                                colors={['#FF944D', '#FF6600', '#CC5200']}
+                                colors={[Colors.light.primaryButtonBackground.start, Colors.light.primaryButtonBackground.end]}
                                 style={styles.saveButtonGradient}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                             >
-                                <Save size={20} color="#fff" />
+                                <Save size={20} color={Colors.light.primaryButtonForeground} />
                                 <Text style={styles.saveButtonText}>
                                     {isLoading ? 'Saving...' : 'Save Changes'}
                                 </Text>
@@ -323,6 +326,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginHorizontal: 4,
         backgroundColor: '#f9f9f9',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 4,
     },
     genderOptionSelected: {
         borderColor: '#333',
@@ -350,7 +356,7 @@ const styles = StyleSheet.create({
     saveButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#fff',
+        color: Colors.light.primaryButtonForeground,
         marginLeft: 8,
     },
 });

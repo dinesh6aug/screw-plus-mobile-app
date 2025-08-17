@@ -16,11 +16,16 @@ export const Colors = {
     tabIconSelected: tintColorLight,
     placeholderTextColor: '#666',
     homeScreenHeaderBackground: {
-      start: '#4c669f',
-      end: '#3b5998',
-      middle: '#192f6a',
+      start: '#6EE7B7',
+      end: '#3AB7BF',
     },
     homeScreenHeaderForeground: '#333',
+
+    primaryButtonBackground: {
+      start: '#6EE7B7',
+      end: '#3AB7BF',
+    },
+    primaryButtonForeground: '#333',
   },
   dark: {
     text: '#ECEDEE',

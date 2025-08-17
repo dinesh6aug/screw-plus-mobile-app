@@ -1,5 +1,7 @@
+import { Colors } from '@/constants/Colors';
 import { useStore } from '@/store/useStore';
 import { CartItem } from '@/types/product';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react-native';
 import React from 'react';
@@ -103,14 +105,23 @@ export default function CartScreen() {
         <View style={styles.footer}>
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Total Amount:</Text>
-            <Text style={styles.totalAmount}>₹{getCartTotal()}</Text>
+            <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 12 }}>Incl. Taxes</Text>
+              <Text style={styles.totalAmount}>₹{getCartTotal().toFixed(2)}</Text>
+            </View>
           </View>
 
           <TouchableOpacity
-            style={styles.checkoutButton}
             onPress={() => router.push('/checkout')}
           >
-            <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+            <LinearGradient
+              style={styles.checkoutButton}
+              colors={[Colors.light.primaryButtonBackground.start, Colors.light.primaryButtonBackground.end]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -265,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkoutButtonText: {
-    color: '#fff',
+    color: Colors.light.primaryButtonForeground,
     fontSize: 16,
     fontWeight: 'bold',
   },

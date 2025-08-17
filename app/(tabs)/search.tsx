@@ -1,12 +1,13 @@
 import ProductCard from '@/components/ProductCard';
+import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
-import { useFocusEffect } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, useFocusEffect } from 'expo-router';
 import { Search as SearchIcon, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function SearchScreen() {
     const { searchQuery, setSearchQuery } = useStore();
@@ -74,19 +75,23 @@ export default function SearchScreen() {
         setIsFocused(false);
         inputRef.current?.blur();
         Keyboard.dismiss();
+        router.back();
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-            <View style={styles.container}>
+        <LinearGradient
+            colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
+            style={{ flex: 1 }}
+            start={{ x: 0, y: 0 }}  // gradient start point
+            end={{ x: 1, y: 0 }}    // gradient end point
+        >
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top', 'left', 'right']}>
                 <View style={styles.searchContainer}>
                     {!isFocused && (
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                            <Text style={{ fontSize: 28, fontWeight: '600' }}>Search</Text>
+                            <Text style={{ fontSize: 28, fontWeight: '600', color: Colors.light.homeScreenHeaderForeground }}>Search</Text>
                         </View>
                     )}
-
-
                     {/* Search bar + cancel */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
                         <View style={[styles.searchInputContainer, { width: isFocused ? '82%' : '100%' }]}>
@@ -117,59 +122,59 @@ export default function SearchScreen() {
 
                         {isFocused && (
                             <TouchableOpacity onPress={handleCancel}>
-                                <Text style={{ fontSize: 20, fontWeight: '500' }}>Cancel</Text>
+                                <Text style={{ fontSize: 20, fontWeight: '500', color: Colors.light.homeScreenHeaderForeground }}>Cancel</Text>
                             </TouchableOpacity>
                         )}
                     </View>
                 </View>
+                <View style={styles.container}>
 
-                {loading ? (
-                    <View style={styles.emptyContainer}>
-                        <ActivityIndicator size="large" color="#666" />
-                    </View>
-                ) : localQuery.trim() === '' ? (
-                    <View style={styles.emptyContainer}>
-                        <SearchIcon size={64} color="#ccc" />
-                        <Text style={styles.emptyTitle}>Search Products</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Find your favorite items from our collection
-                        </Text>
-                    </View>
-                ) : filteredProducts.length === 0 ? (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyTitle}>No products found</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Try searching with different keywords
-                        </Text>
-                    </View>
-                ) : (
-                    <View style={styles.resultsContainer}>
-                        <Text style={styles.resultsText}>
-                            {filteredProducts.length} results for &ldquo;{localQuery}&rdquo;
-                        </Text>
-                        <FlatList
-                            data={filteredProducts}
-                            renderItem={renderProduct}
-                            numColumns={2}
-                            columnWrapperStyle={styles.row}
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.productsContainer}
-                        />
-                    </View>
-                )}
-            </View>
-        </SafeAreaView >
+                    {loading ? (
+                        <View style={styles.emptyContainer}>
+                            <ActivityIndicator size="large" color="#666" />
+                        </View>
+                    ) : localQuery.trim() === '' ? (
+                        <View style={styles.emptyContainer}>
+                            <SearchIcon size={64} color="#ccc" />
+                            <Text style={styles.emptyTitle}>Search Products</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Find your favorite items from our collection
+                            </Text>
+                        </View>
+                    ) : filteredProducts.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyTitle}>No products found</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Try searching with different keywords
+                            </Text>
+                        </View>
+                    ) : (
+                        <View style={styles.resultsContainer}>
+                            <Text style={styles.resultsText}>
+                                {filteredProducts.length} results for &ldquo;{localQuery}&rdquo;
+                            </Text>
+                            <FlatList
+                                data={filteredProducts}
+                                renderItem={renderProduct}
+                                numColumns={2}
+                                columnWrapperStyle={styles.row}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={styles.productsContainer}
+                            />
+                        </View>
+                    )}
+                </View>
+            </SafeAreaView >
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f8f9fa' },
     searchContainer: {
-        backgroundColor: '#fff',
+        backgroundColor: 'transparent',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e9ecef',
     },
     searchInputContainer: {
         flexDirection: 'row',

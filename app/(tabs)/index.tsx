@@ -41,6 +41,7 @@ export default function HomeScreen() {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
+        <Text style={styles.welcomeText}>Deliver to</Text>
         <TouchableOpacity
           style={styles.locationButton}
           onPress={() => setShowLocationSelector(true)}
@@ -49,26 +50,25 @@ export default function HomeScreen() {
           <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{selectedLocation}</Text>
           <ChevronDown size={16} color="#333" />
         </TouchableOpacity>
-        {/* <Text style={styles.welcomeText}>Welcome to Screw Plus</Text> */}
       </View>
       <View style={styles.headerRight}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/search')}
         >
-          <Search size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
+          <Search size={24} color={Colors.light.homeScreenHeaderForeground} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/notifications')}
         >
-          <Bell size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
+          <Bell size={24} color={Colors.light.homeScreenHeaderForeground} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.headerButton, styles.cartButton]}
           onPress={() => router.push('/cart')}
         >
-          <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
+          <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground} />
           {cartItemsCount > 0 && (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
@@ -102,8 +102,7 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient
-      // colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.middle, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
-      colors={['#6EE7B7', '#3AB7BF']}
+      colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
       style={styles.container}
       start={{ x: 0, y: 0 }}  // gradient start point
       end={{ x: 1, y: 0 }}    // gradient end point
@@ -180,11 +179,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 6,
     backgroundColor: 'transparent',
   },
   headerLeft: {
-    flex: 0.9,
+    flex: 0.7,
   },
   locationButton: {
     flexDirection: 'row',
@@ -203,8 +202,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
   },
   welcomeText: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
+    color: Colors.light.homeScreenHeaderForeground,
+    fontWeight: '700',
+    marginBottom: 2,
+    marginLeft: 6
   },
   headerRight: {
     flexDirection: 'row',

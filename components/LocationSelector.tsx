@@ -1,6 +1,8 @@
+import { firebaseService } from '@/services/firebaseService';
+import { formatAddress } from '@/services/utilityService';
 import { useAuth } from '@/store/useAuth';
 import { MapPin, Search, X } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     FlatList,
     Modal,
@@ -17,32 +19,35 @@ interface LocationSelectorProps {
     onClose: () => void;
 }
 
-const locations = [
-    'Mumbai, Maharashtra',
-    'Delhi, Delhi',
-    'Bangalore, Karnataka',
-    'Hyderabad, Telangana',
-    'Chennai, Tamil Nadu',
-    'Kolkata, West Bengal',
-    'Pune, Maharashtra',
-    'Ahmedabad, Gujarat',
-    'Jaipur, Rajasthan',
-    'Surat, Gujarat',
-    'Lucknow, Uttar Pradesh',
-    'Kanpur, Uttar Pradesh',
-    'Nagpur, Maharashtra',
-    'Indore, Madhya Pradesh',
-    'Thane, Maharashtra',
-    'Bhopal, Madhya Pradesh',
-    'Visakhapatnam, Andhra Pradesh',
-    'Pimpri-Chinchwad, Maharashtra',
-    'Patna, Bihar',
-    'Vadodara, Gujarat',
-];
-
 export default function LocationSelector({ visible, onClose }: LocationSelectorProps) {
+
+    const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: auth userId se replace karo
+
     const [searchQuery, setSearchQuery] = useState('');
     const { updateSelectedLocation } = useAuth();
+
+    const [locations, setLocations] = useState<string[]>([
+        'Mumbai, Maharashtra',
+        'Delhi, Delhi',
+        'Bangalore, Karnataka',
+        'Hyderabad, Telangana',
+        'Chennai, Tamil Nadu',
+        'Kolkata, West Bengal',
+        'Pune, Maharashtra',
+        'Ahmedabad, Gujarat',
+        'Jaipur, Rajasthan',
+        'Surat, Gujarat',
+        'Lucknow, Uttar Pradesh',
+        'Kanpur, Uttar Pradesh',
+        'Nagpur, Maharashtra',
+        'Indore, Madhya Pradesh',
+        'Thane, Maharashtra',
+        'Bhopal, Madhya Pradesh',
+        'Visakhapatnam, Andhra Pradesh',
+        'Pimpri-Chinchwad, Maharashtra',
+        'Patna, Bihar',
+        'Vadodara, Gujarat',
+    ]);
 
     const filteredLocations = locations.filter(location =>
         location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,6 +67,19 @@ export default function LocationSelector({ visible, onClose }: LocationSelectorP
             <Text style={styles.locationText}>{item}</Text>
         </TouchableOpacity>
     );
+
+    useEffect(() => {
+        const unsubscribe = firebaseService.subscribeToAddresses(userId, (data) => {
+            console.log('Addresses updated:', JSON.stringify(data, null, 2));
+
+            setLocations(data.map(addr => formatAddress(addr)));
+            // setAddresses(data);
+            // const values: Record<string, Animated.Value> = {};
+            // data.forEach(addr => { values[addr.id] = new Animated.Value(1); });
+            // setAnimatedValues(values);
+        });
+        return () => unsubscribe();
+    }, []);
 
     return (
         <Modal

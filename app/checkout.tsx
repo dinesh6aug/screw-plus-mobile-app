@@ -1,12 +1,13 @@
+import { Colors } from '@/constants/Colors';
 import { sendOrderNotification } from '@/services/notificationService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CheckCircle, CreditCard, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function CheckoutScreen() {
     const { cart, getCartTotal, clearCart, addOrder } = useStore();
@@ -128,7 +129,7 @@ export default function CheckoutScreen() {
                     {/* Delivery Address */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <MapPin size={20} color="#3742fa" />
+                            <MapPin size={20} color={Colors.light.primaryButtonBackground.end} />
                             <Text style={styles.sectionTitle}>Delivery Address</Text>
                         </View>
                         {addresses.map((address, index) => (
@@ -151,7 +152,7 @@ export default function CheckoutScreen() {
                     {/* Payment Method */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <CreditCard size={20} color="#3742fa" />
+                            <CreditCard size={20} color={Colors.light.primaryButtonBackground.end} />
                             <Text style={styles.sectionTitle}>Payment Method</Text>
                         </View>
                         {paymentMethods.map((method) => (
@@ -210,14 +211,20 @@ export default function CheckoutScreen() {
 
                 <View style={styles.footer}>
                     <TouchableOpacity
-                        style={[styles.placeOrderButton, isProcessing && styles.disabledButton]}
                         onPress={handlePlaceOrder}
                         disabled={isProcessing}
                     >
-                        <CheckCircle size={20} color="#fff" />
-                        <Text style={styles.placeOrderText}>
-                            {isProcessing ? 'Processing...' : `Place Order • ₹${finalTotal.toLocaleString()}`}
-                        </Text>
+                        <LinearGradient
+                            style={[styles.placeOrderButton, isProcessing && styles.disabledButton]}
+                            colors={[Colors.light.primaryButtonBackground.start, Colors.light.primaryButtonBackground.end]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <CheckCircle size={20} color={Colors.light.primaryButtonForeground} />
+                            <Text style={styles.placeOrderText}>
+                                {isProcessing ? 'Processing...' : `Place Order • ₹${finalTotal.toLocaleString()}`}
+                            </Text>
+                        </LinearGradient>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -312,7 +319,7 @@ const styles = StyleSheet.create({
     selectedOption: {
         backgroundColor: '#e8f2ff',
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: Colors.light.primaryButtonBackground.end,
     },
     radioButton: {
         width: 20,
@@ -328,7 +335,7 @@ const styles = StyleSheet.create({
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: '#333',
+        backgroundColor: Colors.light.primaryButtonBackground.end,
     },
     addressText: {
         fontSize: 14,
@@ -383,12 +390,13 @@ const styles = StyleSheet.create({
     totalValue: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#3742fa',
+        color: Colors.light.primaryButtonBackground.end,
     },
     footer: {
         backgroundColor: '#fff',
         paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingTop: 16,
+        paddingBottom: 24,
         borderTopWidth: 1,
         borderTopColor: '#e9ecef',
     },
@@ -406,7 +414,7 @@ const styles = StyleSheet.create({
     placeOrderText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#fff',
+        color: Colors.light.primaryButtonForeground,
         marginLeft: 8,
     },
     emptyContainer: {

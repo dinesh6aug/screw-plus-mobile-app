@@ -23,7 +23,7 @@ export default function AddressesScreen() {
   const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
   const [modalVisible, setModalVisible] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const userId = "user_123"; // TODO: auth userId se replace karo
+  const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: auth userId se replace karo
 
   useEffect(() => {
     const unsubscribe = firebaseService.subscribeToAddresses(userId, (data) => {
@@ -39,6 +39,11 @@ export default function AddressesScreen() {
     if (id) {
       await firebaseService.updateAddress(userId, id, data);
     } else {
+      if (addresses.some(addr => addr.isDefault)) {
+        data.isDefault = false; // Only set new address as default if no default exists
+      } else {
+        data.isDefault = true; // Set first address as default
+      }
       await firebaseService.addAddress(userId, data);
     }
     setModalVisible(false);
@@ -146,6 +151,7 @@ export default function AddressesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    minHeight: '100%',
   },
   header: {
     padding: 16,

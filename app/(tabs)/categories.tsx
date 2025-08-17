@@ -2,6 +2,7 @@ import ProductCard from '@/components/ProductCard';
 import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ShoppingCart } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
@@ -85,8 +86,13 @@ export default function CategoriesScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-      <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.light.homeScreenHeaderBackground.start, Colors.light.homeScreenHeaderBackground.end]}  // gradient colors
+      style={{ flex: 1 }}
+      start={{ x: 0, y: 0 }}  // gradient start point
+      end={{ x: 1, y: 0 }}    // gradient end point
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>Categories</Text>
@@ -97,7 +103,7 @@ export default function CategoriesScreen() {
               style={[styles.headerButton, styles.cartButton]}
               onPress={() => router.push('/cart')}
             >
-              <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground || "#333"} />
+              <ShoppingCart size={24} color={Colors.light.homeScreenHeaderForeground} />
               {cartItemsCount > 0 && (
                 <View style={styles.cartBadge}>
                   <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
@@ -106,27 +112,29 @@ export default function CategoriesScreen() {
             </TouchableOpacity>
           </View>
         </View>
+        <View style={styles.container}>
 
-        <FlatList
-          data={categoryOptions}
-          renderItem={renderCategoryFilter}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryFilters}
-          contentContainerStyle={styles.categoryFiltersContent}
-        />
+          <FlatList
+            data={categoryOptions}
+            renderItem={renderCategoryFilter}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryFilters}
+            contentContainerStyle={styles.categoryFiltersContent}
+          />
 
-        <FlatList
-          data={filteredProducts}
-          renderItem={renderProduct}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.productsContainer}
-          keyExtractor={item => item.id}
-        />
-      </View>
-    </SafeAreaView>
+          <FlatList
+            data={filteredProducts}
+            renderItem={renderProduct}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.productsContainer}
+            keyExtractor={item => item.id}
+          />
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -137,10 +145,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    paddingVertical: 11,
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -148,11 +154,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.light.homeScreenHeaderForeground,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.light.homeScreenHeaderForeground,
+    opacity: 0.8,
     marginTop: 4,
   },
   headerButton: {
