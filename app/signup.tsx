@@ -156,7 +156,7 @@ export default function SignUpScreen() {
               testID="signup-button"
             >
               <LinearGradient
-                colors={['#FF944D', '#FF6600', '#CC5200']}
+                colors={[Colors.light.primaryButtonBackground.start, Colors.light.primaryButtonBackground.end]}
                 style={styles.signUpButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}

@@ -4,15 +4,15 @@ import { firebaseService } from '@/services/firebaseService';
 import { useStore } from '@/store/useStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { ShoppingCart } from 'lucide-react-native';
+import { ShoppingCart, Sparkles } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CategoriesScreen() {
   const { selectedCategory, setSelectedCategory, getCartItemsCount } = useStore();
   const [activeCategory, setActiveCategory] = useState(selectedCategory);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const cartItemsCount = getCartItemsCount();
@@ -28,7 +28,7 @@ export default function CategoriesScreen() {
           firebaseService.getProducts()
         ]);
 
-        setCategories(categoryData.map(cat => cat.name));
+        setCategories(categoryData);
         setProducts(productData);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -40,17 +40,22 @@ export default function CategoriesScreen() {
     fetchData();
   }, []);
 
-  const categoryOptions = ['All', ...categories];
+  const categoryOptions = [{
+    id: 'all',
+    name: 'All',
+    count: products.length,
+    color: '#f0f0f0',
+  }, ...categories];
 
   const filteredProducts =
-    activeCategory === 'All'
+    (!activeCategory.id || activeCategory.id === 'all')
       ? products
-      : products.filter(product => product.category === activeCategory);
+      : products.filter(product => product.category === activeCategory.name);
 
-  const handleCategoryPress = (category: string) => {
-    setActiveCategory(category);
-    setSelectedCategory(category);
-  };
+  // const handleCategoryPress = (category: string) => {
+  //   setActiveCategory(category);
+  //   setSelectedCategory(category);
+  // };
 
   const renderProduct = ({ item }: { item: any }) => (
     <View style={styles.productContainer}>
@@ -58,24 +63,24 @@ export default function CategoriesScreen() {
     </View>
   );
 
-  const renderCategoryFilter = ({ item }: { item: string }) => (
-    <TouchableOpacity
-      style={[
-        styles.categoryFilter,
-        activeCategory === item && styles.categoryFilterActive
-      ]}
-      onPress={() => handleCategoryPress(item)}
-    >
-      <Text
-        style={[
-          styles.categoryFilterText,
-          activeCategory === item && styles.categoryFilterTextActive
-        ]}
-      >
-        {item}
-      </Text>
-    </TouchableOpacity>
-  );
+  // const renderCategoryFilter = ({ item }: { item: string }) => (
+  //   <TouchableOpacity
+  //     style={[
+  //       styles.categoryFilter,
+  //       activeCategory === item && styles.categoryFilterActive
+  //     ]}
+  //     onPress={() => handleCategoryPress(item)}
+  //   >
+  //     <Text
+  //       style={[
+  //         styles.categoryFilterText,
+  //         activeCategory === item && styles.categoryFilterTextActive
+  //       ]}
+  //     >
+  //       {item}
+  //     </Text>
+  //   </TouchableOpacity>
+  // );
 
   if (loading) {
     return (
@@ -84,6 +89,45 @@ export default function CategoriesScreen() {
       </SafeAreaView>
     );
   }
+
+  const renderCategory = ({ item }: any) => (
+    <TouchableOpacity
+      onPress={() => {
+        setSelectedCategory(item);
+        setActiveCategory(item);
+      }}
+      style={[
+        styles.categoryItem,
+        activeCategory.id === item.id && styles.activeCategoryItem,
+      ]}>
+      {
+        item.image ? (
+          <View style={styles.subcategoryImageContainer}>
+            <Image source={{ uri: item.image }} style={styles.subcategoryImage} />
+          </View>
+        ) : (
+          <Sparkles size={24} color={Colors.light.homeScreenHeaderForeground} />
+        )
+      }
+      <Text
+        style={[
+          styles.categoryText,
+          activeCategory.id === item.id && styles.activeCategoryText,
+        ]}>
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  // const renderSubcategory = ({ item }: any) => (
+  //   <View style={[styles.subcategoryBox, { backgroundColor: item.color }]}>
+  //     <Image source={{ uri: item.image }} style={styles.subcategoryImage} />
+  //     <Text style={styles.subcategoryName}>{item.name}</Text>
+  //     <View style={styles.subcategoryCountBadge}>
+  //       <Text style={styles.badgeText}>{item.count}</Text>
+  //     </View>
+  //   </View>
+  // );
 
   return (
     <LinearGradient
@@ -114,24 +158,51 @@ export default function CategoriesScreen() {
         </View>
         <View style={styles.container}>
 
+
+          {/* Left category list */}
           <FlatList
             data={categoryOptions}
-            renderItem={renderCategoryFilter}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoryFilters}
-            contentContainerStyle={styles.categoryFiltersContent}
+            renderItem={renderCategory}
+            keyExtractor={(item) => item.id}
+            style={styles.leftMenu}
           />
 
+          {/* Right subcategory grid */}
           <FlatList
-            data={filteredProducts}
+            data={(!activeCategory.id || activeCategory.id === 'all') ? products : products.filter(product => product.category === activeCategory.name)}
             renderItem={renderProduct}
-            numColumns={2}
-            columnWrapperStyle={styles.row}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.productsContainer}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
+            numColumns={1}
+            contentContainerStyle={styles.subcategoryContainer}
           />
+
+          {/* {
+            false && (
+              <>
+                <FlatList
+                  data={categoryOptions}
+                  renderItem={renderCategoryFilter}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.categoryFilters}
+                  contentContainerStyle={styles.categoryFiltersContent}
+                />
+
+                <FlatList
+                  data={filteredProducts}
+                  renderItem={renderProduct}
+                  numColumns={2}
+                  columnWrapperStyle={styles.row}
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.productsContainer}
+                  keyExtractor={item => item.id}
+                />
+              </>
+            )
+          } */}
+
+          {/* New UI */}
+
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -141,7 +212,9 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    width: '100%'
   },
   header: {
     paddingHorizontal: 16,
@@ -229,5 +302,93 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+
+  // New UI styles
+  leftMenu: {
+    maxWidth: '25%',
+    backgroundColor: '#ccc2',
+    borderRightWidth: 1,
+    borderRightColor: '#dedede',
+  },
+  categoryItem: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  activeCategoryItem: {
+    backgroundColor: '#fff',
+    borderLeftWidth: 5,
+    borderLeftColor: Colors.light.primaryButtonBackground.end,
+  },
+  categoryText: {
+    fontSize: 16,
+    color: '#888',
+    marginTop: 6,
+  },
+  activeCategoryText: {
+    fontWeight: '500',
+    color: Colors.light.primaryButtonBackground.end,
+  },
+  subcategoryContainer: {
+    maxWidth: '100%',
+    flexGrow: 1,
+    padding: 8
+  },
+  subcategoryBox: {
+    flex: 1,
+    margin: 2,
+    borderRadius: 10,
+    alignItems: 'center',
+    padding: 10,
+    position: 'relative',
+  },
+  subcategoryImageContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subcategoryImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    objectFit: 'cover',
+    resizeMode: 'cover',
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  subcategoryName: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  subcategoryCountBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+    elevation: 3,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });

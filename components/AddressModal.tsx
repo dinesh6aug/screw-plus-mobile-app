@@ -82,12 +82,24 @@ export default function AddressModal({ visible, onClose, onSave, editingAddress 
                             ))}
                         </View>
 
+                        <Text style={styles.label}>Name *</Text>
                         <TextInput placeholder="Name" value={form.name} onChangeText={t => handleChange("name", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
-                        <TextInput placeholder="Address" value={form.address} onChangeText={t => handleChange("address", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
-                        <TextInput placeholder="City" value={form.city} onChangeText={t => handleChange("city", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
-                        <TextInput placeholder="State" value={form.state} onChangeText={t => handleChange("state", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
-                        <TextInput placeholder="Pincode" keyboardType="numeric" value={form.pincode} onChangeText={t => handleChange("pincode", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                        <Text style={styles.label}>Phone *</Text>
                         <TextInput placeholder="Phone" keyboardType="phone-pad" value={form.phone} onChangeText={t => handleChange("phone", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                        <Text style={styles.label}>Address (House No, Building, Street, Area) *</Text>
+                        <TextInput placeholder="Address (House No, Building, Street, Area)" value={form.address} onChangeText={t => handleChange("address", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                        <Text style={styles.label}>City/District *</Text>
+                        <TextInput placeholder="City/District" value={form.city} onChangeText={t => handleChange("city", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Text style={styles.label}>State *</Text>
+                                <TextInput placeholder="State" value={form.state} onChangeText={t => handleChange("state", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                            </View>
+                            <View style={styles.column}>
+                                <Text style={styles.label}>Pincode *</Text>
+                                <TextInput placeholder="Pincode" keyboardType="numeric" value={form.pincode} onChangeText={t => handleChange("pincode", t)} style={styles.input} placeholderTextColor={Colors.light.placeholderTextColor} />
+                            </View>
+                        </View>
 
                         <View style={styles.row}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
@@ -110,7 +122,8 @@ const styles = StyleSheet.create({
     title: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
     label: { fontSize: 14, fontWeight: "600", marginBottom: 6, color: "#333" },
     input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 10, marginBottom: 10 },
-    row: { flexDirection: "row", justifyContent: "flex-end", marginTop: 10 },
+    row: { flexDirection: "row", justifyContent: 'space-between', marginTop: 10, width: '100%' },
+    column: { width: '49%' },
     cancelBtn: { backgroundColor: "#aaa", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, marginRight: 10 },
     saveBtn: { backgroundColor: "#333", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
     btnText: { color: "#fff", fontWeight: "bold" },

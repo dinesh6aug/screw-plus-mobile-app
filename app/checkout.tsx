@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { sendOrderNotification } from '@/services/notificationService';
+// import { startRazorpayPayment } from '@/services/paymentService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,6 +36,83 @@ export default function CheckoutScreen() {
         { id: 'wallet', name: 'Digital Wallet', icon: '💰' }
     ];
 
+    // const handleRazorpayPayment = async () => {
+    //     try {
+    //         const orderDetails = {
+    //             orderId: 'order_' + Date.now(),
+    //             Amount: finalTotal.toString(),
+    //             EmailId: '', // Collect from user input
+    //             MobileNo: '', // Collect from user input
+    //             CustomerName: 'Pradeep Suthar', // Collect from user input
+    //             CustomerEmail: 'sutharpradeep081@gmail.com',
+    //             CustomerMobile: '8440077147',
+    //             CompanyName: 'Screw Plus', // Collect from user input
+    //             CompanyLogo: 'https://example.com/logo.png', // Your company logo
+    //             Description: 'Order Payment',
+    //             MTxnId: `MT${Date.now()}`, // Unique transaction ID
+    //         };
+    //         const options = {
+    //             key: 'rzp_test_cURWUv0ns0gAYU', // Replace with your Razorpay key
+    //             amount: finalTotal * 100, // Amount in paise
+    //             currency: 'INR',
+    //             name: orderDetails.CompanyName,
+    //             description: orderDetails.Description,
+    //             image: orderDetails.CompanyLogo, // Your app logo
+    //             order_id: orderDetails.orderId, // Unique order ID
+    //             prefill: {
+    //                 name: orderDetails.CustomerName,
+    //                 email: orderDetails.CustomerEmail,
+    //                 contact: orderDetails.CustomerMobile,
+    //             },
+    //             theme: { color: Colors.light.primaryButtonBackground.end },
+    //         };
+    //         startRazorpayPayment({
+    //             amount: options.amount,
+    //             orderId: orderDetails.orderId, // Collect Order ID from Backend
+    //             email: orderDetails.EmailId,
+    //             contact: orderDetails?.MobileNo,
+    //             name: orderDetails?.CustomerName,
+    //             companyName: orderDetails.CompanyName,
+    //             key: options.key,
+    //             description: orderDetails?.Description,
+    //             transactionId: orderDetails?.MTxnId,  // Collect Transaction ID from Backend
+    //             onSuccess: async (data) => {
+    //                 console.log('Payment Success:', data);
+    //                 if (data.razorpay_payment_id && data.razorpay_signature && data.razorpay_order_id) {
+    //                     const resPayload = {
+    //                         'razorpay_signature': data.razorpay_signature,
+    //                         'razorpay_payment_id': data.razorpay_payment_id,
+    //                         'razorpay_order_id': data.razorpay_order_id,
+    //                         'razorpay_mobile': options.prefill.contact,
+    //                         'razorpay_email': options.prefill.email,
+    //                     };
+    //                     console.log('resPayload', resPayload);
+    //                     Alert.alert(
+    //                         'Order Placed Successfully!',
+    //                         `Your order has been placed successfully. Order total: ₹${finalTotal.toLocaleString()}`,
+    //                         [
+    //                             {
+    //                                 text: 'View Orders',
+    //                                 onPress: () => router.replace('/orders')
+    //                             },
+    //                             {
+    //                                 text: 'Continue Shopping',
+    //                                 onPress: () => router.replace('/(tabs)')
+    //                             }
+    //                         ]
+    //                     );
+    //                 }
+    //             },
+    //             onError: (error) => {
+    //                 console.log('Payment Error:', error);
+    //             },
+    //         });
+    //     } catch (error) {
+    //         console.error('Razorpay Payment Error:', error);
+    //         Alert.alert('Payment Error', 'An error occurred while initiating payment. Please try again.');
+    //     }
+    // };
+
     const handlePlaceOrder = async () => {
         if (!selectedAddress) {
             Alert.alert('Error', 'Please select a delivery address');
@@ -66,7 +144,6 @@ export default function CheckoutScreen() {
 
             // Send push notification
             await sendOrderNotification('pending', `CS${Date.now()}`);
-
             Alert.alert(
                 'Order Placed Successfully!',
                 `Your order has been placed successfully. Order total: ₹${finalTotal.toLocaleString()}`,

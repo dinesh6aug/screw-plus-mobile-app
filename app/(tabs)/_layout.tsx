@@ -1,4 +1,3 @@
-import { Colors } from "@/constants/Colors";
 import { useStore } from "@/store/useStore";
 import { Tabs } from "expo-router";
 import { Grid3X3, Home, Search, User } from "lucide-react-native";
@@ -11,7 +10,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.light.homeScreenHeaderBackground.start || '#333',
+        tabBarActiveTintColor: '#333',
         tabBarInactiveTintColor: '#999',
         headerShown: false,
         tabBarStyle: {

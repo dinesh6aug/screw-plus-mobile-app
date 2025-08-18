@@ -1,9 +1,11 @@
+import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { formatAddress } from '@/services/utilityService';
 import { useAuth } from '@/store/useAuth';
-import { MapPin, Search, X } from 'lucide-react-native';
+import { CheckCircle, MapPin, Search, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     FlatList,
     Modal,
     StyleSheet,
@@ -17,66 +19,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 interface LocationSelectorProps {
     visible: boolean;
     onClose: () => void;
+    getLocations: (locations: { id: any, label: string }[]) => void;
 }
 
-export default function LocationSelector({ visible, onClose }: LocationSelectorProps) {
-
-    const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: auth userId se replace karo
+export default function LocationSelector({ visible, onClose, getLocations }: LocationSelectorProps) {
+    const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: replace with auth userId
+    const { updateSelectedLocation, selectedLocation } = useAuth();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const { updateSelectedLocation } = useAuth();
+    const [locations, setLocations] = useState<{ id: any, label: string }[]>([]);
 
-    const [locations, setLocations] = useState<string[]>([
-        'Mumbai, Maharashtra',
-        'Delhi, Delhi',
-        'Bangalore, Karnataka',
-        'Hyderabad, Telangana',
-        'Chennai, Tamil Nadu',
-        'Kolkata, West Bengal',
-        'Pune, Maharashtra',
-        'Ahmedabad, Gujarat',
-        'Jaipur, Rajasthan',
-        'Surat, Gujarat',
-        'Lucknow, Uttar Pradesh',
-        'Kanpur, Uttar Pradesh',
-        'Nagpur, Maharashtra',
-        'Indore, Madhya Pradesh',
-        'Thane, Maharashtra',
-        'Bhopal, Madhya Pradesh',
-        'Visakhapatnam, Andhra Pradesh',
-        'Pimpri-Chinchwad, Maharashtra',
-        'Patna, Bihar',
-        'Vadodara, Gujarat',
-    ]);
+    const [isLoading, setIsLoading] = useState(false);
 
+    // 🔹 Fix filtering to use label
     const filteredLocations = locations.filter(location =>
-        location.toLowerCase().includes(searchQuery.toLowerCase())
+        location.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleSelectLocation = async (location: string) => {
-        await updateSelectedLocation(location);
+    // 🔹 Pass whole object
+    const handleSelectLocation = async (location: { id: any, label: string }) => {
+        setIsLoading(true);
+        await updateSelectedLocation(location.id);
         onClose();
+        setIsLoading(false);
     };
 
-    const renderLocationItem = ({ item }: { item: string }) => (
+    // 🔹 Correct item type
+    const renderLocationItem = ({ item }: { item: { id: any, label: string } }) => (
         <TouchableOpacity
             style={styles.locationItem}
             onPress={() => handleSelectLocation(item)}
         >
             <MapPin size={20} color="#666" />
-            <Text style={styles.locationText}>{item}</Text>
+            <Text style={styles.locationText}>{item.label}</Text>
+            {selectedLocation === item.id && (<CheckCircle size={20} color={Colors.light.primaryButtonBackground.end} />)}
         </TouchableOpacity>
     );
 
     useEffect(() => {
         const unsubscribe = firebaseService.subscribeToAddresses(userId, (data) => {
-            console.log('Addresses updated:', JSON.stringify(data, null, 2));
-
-            setLocations(data.map(addr => formatAddress(addr)));
-            // setAddresses(data);
-            // const values: Record<string, Animated.Value> = {};
-            // data.forEach(addr => { values[addr.id] = new Animated.Value(1); });
-            // setAnimatedValues(values);
+            // console.log('Addresses updated:', JSON.stringify(data, null, 2));
+            const locations = data.map((addr, index) => ({
+                id: addr.id ?? index,
+                label: formatAddress(addr),
+            }));
+            // 🔹 Ensure proper object structure
+            setLocations(locations);
+            getLocations(locations);
         });
         return () => unsubscribe();
     }, []);
@@ -107,13 +96,27 @@ export default function LocationSelector({ visible, onClose }: LocationSelectorP
                     />
                 </View>
 
-                <FlatList
-                    data={filteredLocations}
-                    renderItem={renderLocationItem}
-                    keyExtractor={(item) => item}
-                    style={styles.list}
-                    showsVerticalScrollIndicator={false}
-                />
+                {isLoading ? (
+                    // 🔹 Loader state
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', maxHeight: 100 }}>
+                        <ActivityIndicator size="large" color={Colors.light.primaryButtonBackground.end} />
+                    </View>
+                ) : filteredLocations.length === 0 ? (
+                    // 🔹 Empty state
+                    <View style={{ padding: 20, alignItems: 'center' }}>
+                        <Text style={{ color: '#666' }}>No locations found</Text>
+                    </View>
+                ) : (
+                    // 🔹 List state
+                    <FlatList
+                        data={filteredLocations}
+                        renderItem={renderLocationItem}
+                        keyExtractor={(item) => item.id.toString()}
+                        style={styles.list}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
+
             </SafeAreaView>
         </Modal>
     );
@@ -165,7 +168,6 @@ const styles = StyleSheet.create({
     },
     list: {
         flex: 1,
-        paddingHorizontal: 24,
     },
     locationItem: {
         flexDirection: 'row',
@@ -178,6 +180,8 @@ const styles = StyleSheet.create({
     locationText: {
         fontSize: 16,
         color: '#333',
-        marginLeft: 12,
+        marginHorizontal: 8,
+        flex: 1,
+        width: '84%',
     },
 });

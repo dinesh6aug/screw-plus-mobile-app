@@ -24,6 +24,8 @@ export default function HomeScreen() {
   const bestSellers = products.filter(p => p.isBestseller).slice(0, 4);
   const cartItemsCount = getCartItemsCount();
 
+  const [locations, setLocations] = useState<{ id: string, label: string }[]>([]);
+
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -38,6 +40,14 @@ export default function HomeScreen() {
     </View>
   );
 
+  const getSelectedLocation = (locId: string) => {
+    const loc = locations.find(location => location.id === locId);
+    if (loc) {
+      return loc.label;
+    }
+    return 'Select Location';
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
@@ -47,7 +57,7 @@ export default function HomeScreen() {
           onPress={() => setShowLocationSelector(true)}
         >
           <MapPin size={16} color="#333" />
-          <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{selectedLocation}</Text>
+          <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{getSelectedLocation(selectedLocation)}</Text>
           <ChevronDown size={16} color="#333" />
         </TouchableOpacity>
       </View>
@@ -160,6 +170,11 @@ export default function HomeScreen() {
         <LocationSelector
           visible={showLocationSelector}
           onClose={() => setShowLocationSelector(false)}
+          getLocations={(locations) => {
+            // Handle locations update
+            console.log('Selected locations:', locations);
+            setLocations(locations);
+          }}
         />
       </SafeAreaView>
     </LinearGradient>

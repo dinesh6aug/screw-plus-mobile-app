@@ -17,7 +17,7 @@ interface StoreState {
   orders: Order[];
   wishlist: Product[];
   searchQuery: string;
-  selectedCategory: string;
+  selectedCategory: any;
 
   addToCart: (product: Product, size: string, color: string, quantity?: number) => void;
   removeFromCart: (productId: string, size: string, color: string) => void;
@@ -32,7 +32,7 @@ interface StoreState {
   addOrder: (order: Omit<Order, 'id' | 'orderDate'>) => void;
   
   setSearchQuery: (query: string) => void;
-  setSelectedCategory: (category: string) => void;
+  setSelectedCategory: (category: any) => void;
 
   getCartTotal: () => number;
   getCartItemsCount: () => number;

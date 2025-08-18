@@ -23,7 +23,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HEADER_HEIGHT = 300;
 
 export default function ProductDetailScreen() {
-  const { getCartItemsCount } = useStore();
+  const { getCartItemsCount, cart } = useStore();
   const { id } = useLocalSearchParams();
   const { favorites, toggleFavorite, addToCart } = useStore();
 
@@ -79,13 +79,25 @@ export default function ProductDetailScreen() {
   };
 
   const handleBuyNow = () => {
-    if (!selectedSize || !selectedColor) {
-      alert('Please select size and color');
-      return;
+    const existingItem = cart.find(
+      (item) =>
+        item.product.id === product.id &&
+        item.selectedSize === selectedSize &&
+        item.selectedColor === selectedColor
+    );
+
+    if (existingItem) {
+      router.push('/cart');
+    } else {
+      if (!selectedSize || !selectedColor) {
+        alert('Please select size and color');
+        return;
+      }
+      addToCart(product, selectedSize, selectedColor);
+      router.push('/cart');
     }
-    addToCart(product, selectedSize, selectedColor);
-    router.push('/cart');
   };
+
 
   const handleShare = async () => {
     try {
