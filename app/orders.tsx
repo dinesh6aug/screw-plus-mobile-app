@@ -1,4 +1,4 @@
-import { useStore } from '@/store/useStore';
+import { Order } from '@/types/types';
 import { router } from 'expo-router';
 import { CheckCircle, Clock, Package, ShoppingBag, Truck, XCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -50,7 +50,9 @@ const getStatusColor = (status: string) => {
 };
 
 export default function OrdersScreen() {
-  const { orders } = useStore();
+  // const { orders } = useStore();
+
+  const orders: Order[] = [];
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [animatedValues] = useState(() =>
     orders.reduce((acc, order) => {

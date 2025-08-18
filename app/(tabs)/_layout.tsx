@@ -1,6 +1,6 @@
 import { useStore } from "@/store/useStore";
 import { Tabs } from "expo-router";
-import { Grid3X3, Home, Search, User } from "lucide-react-native";
+import { CirclePlay, Grid3X3, Home, Search, User } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -48,6 +48,13 @@ export default function TabLayout() {
         options={{
           title: "Categories",
           tabBarIcon: ({ color }) => <Grid3X3 size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reels"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ color }) => <CirclePlay size={24} color={color} />,
         }}
       />
       <Tabs.Screen

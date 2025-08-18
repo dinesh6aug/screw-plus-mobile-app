@@ -1,6 +1,6 @@
 import { db } from '@/config/firebase';
 import { Banner, Category, Product } from '@/types/product';
-import Address from '@/types/types';
+import { Address, Order } from '@/types/types';
 import {
   addDoc,
   collection,
@@ -195,8 +195,6 @@ class FirebaseService {
   }
 
   // Address
-
-  // inside FirebaseService class
   async getAddresses(userId: string): Promise<Address[]> {
     const addressesRef = collection(db, `users/${userId}/addresses`);
     const snapshot = await getDocs(addressesRef);
@@ -230,6 +228,43 @@ class FirebaseService {
         ...doc.data(),
       })) as Address[];
       callback(addresses);
+    });
+  }
+
+  // Order
+  async getOrders(userId: string): Promise<Order[]> {
+    const orderRef = collection(db, `users/${userId}/orders`);
+    const snapshot = await getDocs(orderRef);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Order[];
+  }
+
+  async addOrder(userId: string, order: Omit<Order, 'id'>): Promise<string> {
+    const orderRef = collection(db, `users/${userId}/orders`);
+    const docRef = await addDoc(orderRef, order);
+    return docRef.id;
+  }
+
+  async updateOrder(userId: string, id: string, order: Partial<Order>): Promise<void> {
+    const orderRef = doc(db, `users/${userId}/orders`, id);
+    await updateDoc(orderRef, order);
+  }
+
+  async deleteOrder(userId: string, id: string): Promise<void> {
+    const orderRef = doc(db, `users/${userId}/orders`, id);
+    await deleteDoc(orderRef);
+  }
+
+  subscribeToOrder(userId: string, callback: (orders: Order[]) => void) {
+    const orderRef = collection(db, `users/${userId}/orders`);
+    return onSnapshot(orderRef, (snapshot) => {
+      const orders = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Order[];
+      callback(orders);
     });
   }
 

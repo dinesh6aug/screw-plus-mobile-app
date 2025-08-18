@@ -1,3 +1,4 @@
+import LocationSelector from '@/components/LocationSelector';
 import { Colors } from '@/constants/Colors';
 import { sendOrderNotification } from '@/services/notificationService';
 // import { startRazorpayPayment } from '@/services/paymentService';
@@ -5,29 +6,34 @@ import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { CheckCircle, CreditCard, MapPin } from 'lucide-react-native';
+import { CheckCircle, ChevronDown, CreditCard, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CheckoutScreen() {
-    const { cart, getCartTotal, clearCart, addOrder } = useStore();
-    const { } = useAuth();
-    const [selectedAddress, setSelectedAddress] = useState('');
+    const { cart, getCartTotal, clearCart } = useStore();
+    const { user }: any = useAuth();
+    const userId = user.uid;
     const [selectedPayment, setSelectedPayment] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderNotes, setOrderNotes] = useState('');
+    const [locations, setLocations] = useState<{ id: string, label: string }[]>([]);
+
+    const { selectedLocation } = useAuth();
+    console.log('selectedLocation', JSON.stringify(selectedLocation, null, 2))
+    const [showLocationSelector, setShowLocationSelector] = useState(false);
 
     const cartTotal = getCartTotal();
     const deliveryFee = 50;
     const tax = Math.round(cartTotal * 0.18);
     const finalTotal = cartTotal + deliveryFee + tax;
 
-    const addresses = [
-        '123 Main Street, New Delhi, 110001',
-        '456 Park Avenue, Mumbai, 400001',
-        '789 Garden Road, Bangalore, 560001'
-    ];
+    // const addresses = [
+    //     '123 Main Street, New Delhi, 110001',
+    //     '456 Park Avenue, Mumbai, 400001',
+    //     '789 Garden Road, Bangalore, 560001'
+    // ];
 
     const paymentMethods = [
         { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
@@ -114,7 +120,7 @@ export default function CheckoutScreen() {
     // };
 
     const handlePlaceOrder = async () => {
-        if (!selectedAddress) {
+        if (!getSelectedLocation(selectedLocation)) {
             Alert.alert('Error', 'Please select a delivery address');
             return;
         }
@@ -134,12 +140,12 @@ export default function CheckoutScreen() {
                 items: cart,
                 total: finalTotal,
                 status: 'pending' as const,
-                deliveryAddress: selectedAddress,
+                deliveryAddress: getSelectedLocation(selectedLocation),
                 paymentMethod: selectedPayment,
                 notes: orderNotes
             };
 
-            addOrder(order);
+            // addOrder(order);
             clearCart();
 
             // Send push notification
@@ -183,6 +189,14 @@ export default function CheckoutScreen() {
         );
     }
 
+    const getSelectedLocation = (locId: string) => {
+        const loc = locations.find(location => location.id === locId);
+        if (loc) {
+            return loc.label;
+        }
+        return 'Select Location';
+    };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['left', 'right']}>
             <View style={styles.container}>
@@ -209,7 +223,16 @@ export default function CheckoutScreen() {
                             <MapPin size={20} color={Colors.light.primaryButtonBackground.end} />
                             <Text style={styles.sectionTitle}>Delivery Address</Text>
                         </View>
-                        {addresses.map((address, index) => (
+
+                        <TouchableOpacity
+                            style={[styles.addressOption, { justifyContent: 'space-between' }]}
+                            onPress={() => setShowLocationSelector(true)}
+                        >
+                            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">{getSelectedLocation(selectedLocation)}</Text>
+                            <ChevronDown size={16} color="#333" />
+                        </TouchableOpacity>
+
+                        {/* {addresses.map((address, index) => (
                             <TouchableOpacity
                                 key={index}
                                 style={[
@@ -223,7 +246,7 @@ export default function CheckoutScreen() {
                                 </View>
                                 <Text style={styles.addressText}>{address}</Text>
                             </TouchableOpacity>
-                        ))}
+                        ))} */}
                     </View>
 
                     {/* Payment Method */}
@@ -305,6 +328,12 @@ export default function CheckoutScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <LocationSelector
+                visible={showLocationSelector}
+                onClose={() => setShowLocationSelector(false)}
+                getLocations={setLocations}
+            />
         </SafeAreaView>
     );
 }
@@ -515,5 +544,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#fff',
+    },
+    locationText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        marginHorizontal: 6,
+        maxWidth: '90%',
     },
 });

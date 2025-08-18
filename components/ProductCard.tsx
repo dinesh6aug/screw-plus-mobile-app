@@ -7,9 +7,10 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProductCardProps {
   product: Product;
+  width?: number;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, width }: ProductCardProps) {
   const { favorites, toggleFavorite } = useStore();
   const isFavorite = favorites.includes(product.id);
 
@@ -22,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
+    <TouchableOpacity style={[styles.container, { width }]} onPress={handlePress}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.image} />
         <TouchableOpacity
@@ -83,13 +84,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    width: '100%'
   },
   imageContainer: {
     position: 'relative',
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 120,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },

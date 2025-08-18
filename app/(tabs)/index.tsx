@@ -36,7 +36,7 @@ export default function HomeScreen() {
 
   const renderProduct = ({ item }: { item: any }) => (
     <View style={styles.productContainer}>
-      <ProductCard product={item} />
+      <ProductCard product={item} width={180}/>
     </View>
   );
 
@@ -102,10 +102,8 @@ export default function HomeScreen() {
       <FlatList
         data={data}
         renderItem={renderProduct}
-        numColumns={2}
-        scrollEnabled={false}
-        columnWrapperStyle={styles.row}
-        showsVerticalScrollIndicator={false}
+        horizontal
+        showsHorizontalScrollIndicator={false}
       />
     </View>
   );

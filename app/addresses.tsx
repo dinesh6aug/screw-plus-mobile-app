@@ -1,7 +1,8 @@
 import AddressModal from '@/components/AddressModal';
 import { firebaseService } from '@/services/firebaseService'; // 👈 apna service import karo
 import { formatAddress } from '@/services/utilityService';
-import Address from '@/types/types';
+import { useAuth } from '@/store/useAuth';
+import { Address } from '@/types/types';
 import { Building, Edit3, Home, MapPin, Plus, Trash2 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Alert, Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,7 +24,9 @@ export default function AddressesScreen() {
   const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
   const [modalVisible, setModalVisible] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: auth userId se replace karo
+
+  const { user }: any = useAuth();
+  const userId = user.uid;
 
   useEffect(() => {
     const unsubscribe = firebaseService.subscribeToAddresses(userId, (data) => {

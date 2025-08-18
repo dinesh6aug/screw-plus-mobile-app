@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CategoriesScreen() {
   const { selectedCategory, setSelectedCategory, getCartItemsCount } = useStore();
-  const [activeCategory, setActiveCategory] = useState(selectedCategory);
+  const [activeCategory, setActiveCategory] = useState({ "color": "#f0f0f0", "count": 0, "id": "all", "name": "All" });
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,7 +158,6 @@ export default function CategoriesScreen() {
         </View>
         <View style={styles.container}>
 
-
           {/* Left category list */}
           <FlatList
             data={categoryOptions}
@@ -172,8 +171,8 @@ export default function CategoriesScreen() {
             data={(!activeCategory.id || activeCategory.id === 'all') ? products : products.filter(product => product.category === activeCategory.name)}
             renderItem={renderProduct}
             keyExtractor={(item) => item.id}
-            numColumns={1}
             contentContainerStyle={styles.subcategoryContainer}
+            showsVerticalScrollIndicator={false}
           />
 
           {/* {

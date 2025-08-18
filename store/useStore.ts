@@ -1,20 +1,20 @@
 import { CartItem, Product } from '@/types/product';
 import { create } from 'zustand';
 
-export interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
-  orderDate: Date;
-  deliveryAddress: string;
-  paymentMethod: string;
-}
+// export interface Order {
+//   id: string;
+//   items: CartItem[];
+//   total: number;
+//   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+//   orderDate: Date;
+//   deliveryAddress: string;
+//   paymentMethod: string;
+// }
 
 interface StoreState {
   cart: CartItem[];
   favorites: string[];
-  orders: Order[];
+  // orders: Order[];
   wishlist: Product[];
   searchQuery: string;
   selectedCategory: any;
@@ -29,7 +29,7 @@ interface StoreState {
   removeFromWishlist: (productId: string) => void;
   clearWishlist: () => void;
   
-  addOrder: (order: Omit<Order, 'id' | 'orderDate'>) => void;
+  // addOrder: (order: Omit<Order, 'id' | 'orderDate'>) => void;
   
   setSearchQuery: (query: string) => void;
   setSelectedCategory: (category: any) => void;
@@ -116,15 +116,15 @@ export const useStore = create<StoreState>((set, get) => ({
 
   clearWishlist: () => set({ wishlist: [], favorites: [] }),
 
-  addOrder: (orderData) => {
-    set((state) => ({
-      orders: [...state.orders, {
-        ...orderData,
-        id: Date.now().toString(),
-        orderDate: new Date()
-      }]
-    }));
-  },
+  // addOrder: (orderData) => {
+  //   set((state) => ({
+  //     orders: [...state.orders, {
+  //       ...orderData,
+  //       id: Date.now().toString(),
+  //       orderDate: new Date()
+  //     }]
+  //   }));
+  // },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSelectedCategory: (category) => set({ selectedCategory: category }),
