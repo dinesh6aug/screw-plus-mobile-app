@@ -231,6 +231,47 @@ class FirebaseService {
     });
   }
 
+  // ========== Reviews ==========
+  async getReviews(productId: string) {
+    const reviewsRef = collection(db, `products/${productId}/reviews`);
+    const q = query(reviewsRef, orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  }
+
+  async addReview(
+    productId: string,
+    review: { userId: string; userName: string; rating: number; comment: string }
+  ): Promise<string> {
+    const reviewsRef = collection(db, `products/${productId}/reviews`);
+    const now = Timestamp.now();
+    const docRef = await addDoc(reviewsRef, {
+      ...review,
+      createdAt: now,
+    });
+    return docRef.id;
+  }
+
+  subscribeToReviews(
+    productId: string,
+    callback: (reviews: any[]) => void
+  ) {
+    const reviewsRef = collection(db, `products/${productId}/reviews`);
+    const q = query(reviewsRef, orderBy("createdAt", "desc"));
+
+    return onSnapshot(q, (snapshot) => {
+      const reviews = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(reviews);
+    });
+  }
+
   // Order
   async getOrders(userId: string): Promise<Order[]> {
     const orderRef = collection(db, `users/${userId}/orders`);

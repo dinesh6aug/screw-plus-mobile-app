@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { getDiscountPercentage } from '@/services/utilityService';
 import { useStore } from '@/store/useStore';
 import { CartItem } from '@/types/product';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,46 +24,65 @@ export default function CartScreen() {
     removeFromCart(item.product.id, item.selectedSize, item.selectedColor);
   };
 
-  const renderCartItem = ({ item }: { item: CartItem }) => (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.product.image }} style={styles.itemImage} />
+  const renderCartItem = ({ item }: { item: CartItem }) => {
+    const selectedVariant: any = item.product.variants.find(product => product.size === item.selectedSize && product.color === item.selectedColor);
+    return (
+      <View style={styles.cartItem}>
+        <Image source={{ uri: item.product.image }} style={styles.itemImage} />
 
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemTitle} numberOfLines={2}>
-          {item.product.title}
-        </Text>
-        <Text style={styles.itemVariant}>
-          Size: {item.selectedSize} | Color: {item.selectedColor}
-        </Text>
-        <Text style={styles.itemPrice}>₹{item.product.price}</Text>
+        <View style={styles.itemDetails}>
+          <Text style={styles.itemTitle} numberOfLines={2}>
+            {item.product.title}
+          </Text>
+          <Text style={styles.itemVariant}>
+            Size: {item.selectedSize} | Color: {item.selectedColor}
+          </Text>
+          {selectedVariant ? (
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>₹{selectedVariant.price}</Text>
+              {selectedVariant.originalPrice && (
+                <Text style={styles.originalPrice}>
+                  ₹{selectedVariant.originalPrice}
+                </Text>
+              )}
+              {getDiscountPercentage(selectedVariant.originalPrice, selectedVariant.price) > 0 && (
+                <Text style={styles.discount}>
+                  -{getDiscountPercentage(selectedVariant.originalPrice, selectedVariant.price)}% OFF
+                </Text>
+              )}
+            </View>
+          ) : (
+            <Text style={styles.price}>Please select options</Text>
+          )}
 
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => handleQuantityChange(item, item.quantity - 1)}
-          >
-            <Minus size={16} color="#666" />
-          </TouchableOpacity>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => handleQuantityChange(item, item.quantity - 1)}
+            >
+              <Minus size={16} color="#666" />
+            </TouchableOpacity>
 
-          <Text style={styles.quantity}>{item.quantity}</Text>
+            <Text style={styles.quantity}>{item.quantity}</Text>
 
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => handleQuantityChange(item, item.quantity + 1)}
-          >
-            <Plus size={16} color="#666" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => handleQuantityChange(item, item.quantity + 1)}
+            >
+              <Plus size={16} color="#666" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => handleRemoveItem(item)}
-      >
-        <Trash2 size={20} color="#ff4757" />
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => handleRemoveItem(item)}
+        >
+          <Trash2 size={20} color="#ff4757" />
+        </TouchableOpacity>
+      </View>
+    )
+  };
 
   if (cart.length === 0) {
     return (
@@ -106,7 +126,7 @@ export default function CartScreen() {
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Total Amount:</Text>
             <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 12 }}>Incl. Taxes</Text>
+              <Text style={{ fontSize: 12 }}>Exl. Taxes</Text>
               <Text style={styles.totalAmount}>₹{getCartTotal().toFixed(2)}</Text>
             </View>
           </View>
@@ -222,6 +242,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'green',
+  },
+  originalPrice: {
+    fontSize: 16,
+    color: '#999',
+    textDecorationLine: 'line-through',
+    marginLeft: 12,
+  },
+  discount: {
+    fontSize: 16,
+    color: Colors.light.danger,
+    fontWeight: '500',
+    marginLeft: 12,
   },
   quantityContainer: {
     flexDirection: 'row',

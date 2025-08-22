@@ -84,7 +84,7 @@ export default function ProductFormModal({ visible, product, onClose }: ProductF
 
     setLoading(true);
     try {
-      const productData: Omit<Product, 'id'> = {
+      const productData: Omit<any, 'id'> = {
         title: formData.title,
         price: parseFloat(formData.price),
         originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,

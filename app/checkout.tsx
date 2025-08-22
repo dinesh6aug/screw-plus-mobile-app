@@ -26,8 +26,10 @@ export default function CheckoutScreen() {
 
     const cartTotal = getCartTotal();
     const deliveryFee = 50;
-    const tax = Math.round(cartTotal * 0.18);
-    const finalTotal = cartTotal + deliveryFee + tax;
+    const taxPercentage = 18;
+    const platformFee = 20;
+    const tax = Math.round(cartTotal * (taxPercentage / 100));
+    const finalTotal = cartTotal + deliveryFee + tax + platformFee;
 
     // const addresses = [
     //     '123 Main Street, New Delhi, 110001',
@@ -204,17 +206,22 @@ export default function CheckoutScreen() {
                     {/* Order Summary */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Order Summary</Text>
-                        {cart.map((item, index) => (
-                            <View key={index} style={styles.orderItem}>
-                                <View style={styles.orderItemInfo}>
-                                    <Text style={styles.orderItemName}>{item.product.title}</Text>
-                                    <Text style={styles.orderItemDetails}>
-                                        Size: {item.selectedSize} | Color: {item.selectedColor} | Qty: {item.quantity}
-                                    </Text>
+                        {cart.map((item, index) => {
+
+                            const selectedVariant: any = item.product.variants.find(product => product.size === item.selectedSize && product.color === item.selectedColor);
+
+                            return (
+                                <View key={index} style={styles.orderItem}>
+                                    <View style={styles.orderItemInfo}>
+                                        <Text style={styles.orderItemName}>{item.product.title}</Text>
+                                        <Text style={styles.orderItemDetails}>
+                                            Size: {item.selectedSize} | Color: {item.selectedColor} | Qty: {item.quantity}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.orderItemPrice}>₹{(selectedVariant.price * item.quantity).toLocaleString()}</Text>
                                 </View>
-                                <Text style={styles.orderItemPrice}>₹{(item.product.price * item.quantity).toLocaleString()}</Text>
-                            </View>
-                        ))}
+                            )
+                        })}
                     </View>
 
                     {/* Delivery Address */}
@@ -299,8 +306,12 @@ export default function CheckoutScreen() {
                             <Text style={styles.priceValue}>₹{deliveryFee}</Text>
                         </View>
                         <View style={styles.priceRow}>
-                            <Text style={styles.priceLabel}>Tax (18%)</Text>
+                            <Text style={styles.priceLabel}>Tax ({taxPercentage}%)</Text>
                             <Text style={styles.priceValue}>₹{tax.toLocaleString()}</Text>
+                        </View>
+                        <View style={styles.priceRow}>
+                            <Text style={styles.priceLabel}>Platform Fee</Text>
+                            <Text style={styles.priceValue}>₹{platformFee.toLocaleString()}</Text>
                         </View>
                         <View style={[styles.priceRow, styles.totalRow]}>
                             <Text style={styles.totalLabel}>Total</Text>

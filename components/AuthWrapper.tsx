@@ -13,8 +13,6 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
         const inOnboarding = segments[0] === 'onboarding';
         const inAuthScreens = ['login', 'signup', 'forgot-password'].includes(segments[0] as string);
 
-        console.log('Auth state:', { user: !!user, hasCompletedOnboarding, segments, inAuthScreens });
-
         if (!hasCompletedOnboarding && !inOnboarding && !inAuthScreens) {
             // Onboarding not complete → go to onboarding
             router.replace('/onboarding');

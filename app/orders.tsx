@@ -1,3 +1,4 @@
+import { getProductVariant } from '@/services/utilityService';
 import { Order } from '@/types/types';
 import { router } from 'expo-router';
 import { CheckCircle, Clock, Package, ShoppingBag, Truck, XCircle } from 'lucide-react-native';
@@ -116,7 +117,7 @@ export default function OrdersScreen() {
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName} numberOfLines={1}>{item.product.title}</Text>
                 <Text style={styles.itemVariant}>{item.selectedSize} • {item.selectedColor}</Text>
-                <Text style={styles.itemPrice}>₹{item.product.price} × {item.quantity}</Text>
+                <Text style={styles.itemPrice}>₹{getProductVariant(item.product, item.selectedSize, item.selectedColor).price} × {item.quantity}</Text>
               </View>
             </View>
           ))}

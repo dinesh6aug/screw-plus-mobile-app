@@ -1,6 +1,7 @@
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
+import { Order } from '@/types/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import {
@@ -22,8 +23,10 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
+
+  const orders: Order[] = []
   const { user, userProfile, logout } = useAuth();
-  const { orders, favorites } = useStore();
+  const { favorites } = useStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = () => {

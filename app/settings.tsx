@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import {
   Bell,
   ChevronRight,
@@ -84,7 +85,7 @@ export default function SettingsScreen() {
     onPress?: () => void,
     rightElement?: React.ReactNode
   ) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.settingItem}
       onPress={onPress}
       disabled={!onPress}
@@ -125,7 +126,10 @@ export default function SettingsScreen() {
               <User size={20} color="#3742fa" />,
               'Edit Profile',
               'Update your personal information',
-              () => console.log('Edit profile')
+              () => {
+                console.log('Edit profile');
+                router.push('/edit-profile')
+              }
             )}
             {renderSettingItem(
               <Shield size={20} color="#2ed573" />,
@@ -248,7 +252,7 @@ export default function SettingsScreen() {
               <LogOut size={20} color="#ff4757" />
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
               <Text style={styles.deleteText}>Delete Account</Text>
             </TouchableOpacity>

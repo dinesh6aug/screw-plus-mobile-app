@@ -14,6 +14,17 @@ export interface Product {
   description: string;
   isNew?: boolean;
   isBestseller?: boolean;
+  variants: [
+    {
+      color: string;
+      discount: number;
+      originalPrice: number;
+      price: number;
+      size: string;
+      sku: string;
+      stock: number;
+    }
+  ]
 }
 
 export interface CartItem {

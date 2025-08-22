@@ -23,14 +23,14 @@ interface StoreState {
   removeFromCart: (productId: string, size: string, color: string) => void;
   updateCartQuantity: (productId: string, size: string, color: string, quantity: number) => void;
   clearCart: () => void;
-  
+
   toggleFavorite: (productId: string) => void;
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: string) => void;
   clearWishlist: () => void;
-  
+
   // addOrder: (order: Omit<Order, 'id' | 'orderDate'>) => void;
-  
+
   setSearchQuery: (query: string) => void;
   setSelectedCategory: (category: any) => void;
 
@@ -131,11 +131,24 @@ export const useStore = create<StoreState>((set, get) => ({
 
   getCartTotal: () => {
     const { cart } = get();
-    return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+
+    return cart.reduce((total, item) => {
+      const selectedVariant = item.product.variants.find(
+        (variant: any) =>
+          variant.size === item.selectedSize &&
+          variant.color === item.selectedColor
+      );
+
+      const price = selectedVariant ? selectedVariant.price : item.product.price;
+
+      return total + price * item.quantity;
+    }, 0);
   },
 
   getCartItemsCount: () => {
     const { cart } = get();
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    // return cart.reduce((total, item) => total + item.quantity, 0);
+    return cart.length;
   }
+
 }));

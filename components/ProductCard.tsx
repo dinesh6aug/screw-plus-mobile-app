@@ -1,3 +1,4 @@
+import { getProductVariant } from '@/services/utilityService';
 import { useStore } from '@/store/useStore';
 import { Product } from '@/types/product';
 import { router } from 'expo-router';
@@ -64,9 +65,9 @@ export default function ProductCard({ product, width }: ProductCardProps) {
         </View>
 
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>₹{product.price}</Text>
-          {(product.originalPrice !== product.price) && (
-            <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
+          <Text style={styles.price}>₹{getProductVariant(product).price}</Text>
+          {(getProductVariant(product).originalPrice !== getProductVariant(product).price) && (
+            <Text style={styles.originalPrice}>₹{getProductVariant(product).originalPrice}</Text>
           )}
         </View>
       </View>

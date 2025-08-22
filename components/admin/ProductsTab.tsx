@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Alert,
-  RefreshControl,
-  ActivityIndicator
-} from 'react-native';
-import { Plus, Edit3, Trash2, Package } from 'lucide-react-native';
 import { useFirebaseData } from '@/store/useFirebaseData';
 import { Product } from '@/types/product';
-import ProductFormModal from './ProductFormModal';
+import { Edit3, Package, Plus, Trash2 } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import NewProductFormModal from './NewProductFormModal';
+// import ProductFormModal from './ProductFormModal';
 
 export default function ProductsTab() {
   const { products, loading, deleteProduct } = useFirebaseData();
@@ -128,7 +129,7 @@ export default function ProductsTab() {
         }
       />
 
-      <ProductFormModal
+      <NewProductFormModal
         visible={showForm}
         product={editingProduct}
         onClose={() => {

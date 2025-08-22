@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import createContextHook from '@nkzw/create-context-hook';
-import { Product, Category, Banner } from '@/types/product';
 import { firebaseService } from '@/services/firebaseService';
+import { Banner, Category, Product } from '@/types/product';
+import createContextHook from '@nkzw/create-context-hook';
+import { useEffect, useState } from 'react';
 
 interface FirebaseDataState {
   products: Product[];

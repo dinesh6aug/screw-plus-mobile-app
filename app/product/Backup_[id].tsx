@@ -1,6 +1,5 @@
 import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
-import { getDiscountPercentage, getProductVariant } from '@/services/utilityService';
 import { useStore } from '@/store/useStore';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star } from 'lucide-react-native';
@@ -9,7 +8,6 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
-  FlatList,
   Image,
   ScrollView,
   Share,
@@ -31,11 +29,8 @@ export default function ProductDetailScreen() {
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<any>({});
-
-  const [showFullDesc, setShowFullDesc] = useState(false);
-
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -62,13 +57,6 @@ export default function ProductDetailScreen() {
       if (!data) {
         setError("Product not found");
       } else {
-        if (!Object.keys(selectedOptions).length) {
-          const variant = getProductVariant(data);
-          setSelectedOptions((prev: any) => ({
-            ...prev,
-            ...variant
-          }));
-        }
         setProduct(data);
       }
 
@@ -81,31 +69,31 @@ export default function ProductDetailScreen() {
   const isFavorite = product && favorites.includes(product.id);
 
   const handleAddToCart = () => {
-    if (!selectedOptions.size || !selectedOptions.color) {
+    if (!selectedSize || !selectedColor) {
       alert('Please select size and color');
       return;
     }
-    addToCart(product, selectedOptions.size, selectedOptions.color);
-    alert('Added to cart!');
+    addToCart(product, selectedSize, selectedColor);
     Vibration.vibrate(500);
+    alert('Added to cart!');
   };
 
   const handleBuyNow = () => {
     const existingItem = cart.find(
       (item) =>
         item.product.id === product.id &&
-        item.selectedSize === selectedOptions.size &&
-        item.selectedColor === selectedOptions.color
+        item.selectedSize === selectedSize &&
+        item.selectedColor === selectedColor
     );
 
     if (existingItem) {
       router.push('/cart');
     } else {
-      if (!selectedOptions.size || !selectedOptions.color) {
+      if (!selectedSize || !selectedColor) {
         alert('Please select size and color');
         return;
       }
-      addToCart(product, selectedOptions.size, selectedOptions.color);
+      addToCart(product, selectedSize, selectedColor);
       router.push('/cart');
     }
   };
@@ -115,7 +103,7 @@ export default function ProductDetailScreen() {
     try {
       console.log('Sharing product:', product);
       await Share.share({
-        message: `Check out this amazing product: ${product.title} - ₹${getProductVariant(product).price}`,
+        message: `Check out this amazing product: ${product.title} - ₹${product.price}`,
         url: product.image,
       });
     } catch (error) {
@@ -157,48 +145,6 @@ export default function ProductDetailScreen() {
     extrapolate: 'clamp',
   });
 
-  // const selectedVariant =
-  //   product.variants?.find((variant: any) =>
-  //     Object.entries(selectedOptions).every(
-  //       ([key, value]) => variant[key] === value
-  //     )
-  //   ) || {};
-
-  // const discount =
-  //   selectedOptions?.originalPrice && product.price
-  //     ? Math.round(
-  //       (((selectedOptions.originalPrice || 0) - product.price) /
-  //         (selectedOptions.originalPrice || 1)) * 100
-  //     )
-  //     : null;
-
-  const handleChangeVariant = (type: string, value: string) => {
-    setSelectedOptions((prev: any) => {
-      const updatedOptions = {
-        ...prev,
-        [type]: value
-      };
-
-      if (type === "size") {
-        updatedOptions.color = "";
-      } else if (type === "color") {
-        updatedOptions.size = prev.size;
-      }
-
-      const variant = product.variants.find(
-        (d: any) =>
-          d.size === updatedOptions.size &&
-          d.color === updatedOptions.color
-      );
-
-      return {
-        ...updatedOptions,
-        ...(variant || {}),
-      };
-    });
-  };
-
-
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <View style={styles.container}>
@@ -212,24 +158,7 @@ export default function ProductDetailScreen() {
               </TouchableOpacity>
               <View style={{ width: 200 }}>
                 <Text style={{ fontSize: 14, fontWeight: '500', marginBottom: 3 }} numberOfLines={1} ellipsizeMode='tail'>{product.title}</Text>
-                {selectedOptions ? (
-                  <View style={[styles.priceContainer, { marginBottom: 0 }]}>
-                    <Text style={[styles.price, { fontSize: 14, color: 'green' }]}>₹{selectedOptions.price}</Text>
-                    {selectedOptions.originalPrice && (
-                      <Text style={[styles.originalPrice, { fontSize: 14 }]}>
-                        ₹{selectedOptions.originalPrice}
-                      </Text>
-                    )}
-                    {getDiscountPercentage(selectedOptions.originalPrice, selectedOptions.price) > 0 && (
-                      <Text style={[styles.discount, { fontSize: 14 }]}>
-                        -{getDiscountPercentage(selectedOptions.originalPrice, selectedOptions.price)}% OFF
-                      </Text>
-                    )}
-                  </View>
-                ) : (
-                  <Text style={styles.price}>Please select options</Text>
-                )}
-
+                <Text style={{ fontSize: 14, fontWeight: '500', color: 'green' }}>₹{product.price}</Text>
               </View>
             </View>
             <View style={styles.floatingActions}>
@@ -307,9 +236,9 @@ export default function ProductDetailScreen() {
                   setCurrentImageIndex(index);
                 }}
               >
-                {product.images ? product.images.map((img: string, index: number) => (
-                  <Image key={index} source={{ uri: img }} style={styles.productImage} />
-                )) : <Image source={{ uri: product.image }} style={styles.productImage} />}
+                {productImages.map((image, index) => (
+                  <Image key={index} source={{ uri: image }} style={styles.productImage} />
+                ))}
               </ScrollView>
 
               {/* Image Indicators */}
@@ -342,163 +271,75 @@ export default function ProductDetailScreen() {
               </Text>
             </View>
 
-            {selectedOptions ? (
-              <View style={styles.priceContainer}>
-                <Text style={styles.price}>₹{selectedOptions.price}</Text>
-                {selectedOptions.originalPrice && (
-                  <Text style={styles.originalPrice}>
-                    ₹{selectedOptions.originalPrice}
-                  </Text>
-                )}
-                {getDiscountPercentage(selectedOptions.originalPrice, selectedOptions.price) > 0 && (
-                  <Text style={styles.discount}>
-                    -{getDiscountPercentage(selectedOptions.originalPrice, selectedOptions.price)}% OFF
-                  </Text>
-                )}
-              </View>
-            ) : (
-              <Text style={styles.price}>Please select options</Text>
-            )}
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>₹{product.price}</Text>
+              {product.originalPrice && (
+                <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
+              )}
+              {product.discount && (
+                <Text style={styles.discount}>{product.discount}% OFF</Text>
+              )}
+            </View>
 
-            {/* Variants - Sizes */}
-            {product?.variants?.length > 0 && (
+            {/* Sizes */}
+            {product.sizes?.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Sizes</Text>
-                <View style={styles.optionsRow}>
-                  {[...new Set(product.variants.map((v: any) => v.size))].map(
-                    (size: any, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.option,
-                          selectedOptions.size === size && styles.optionSelected
-                        ]}
-                        onPress={() => handleChangeVariant('size', size)}
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            selectedOptions.size === size && styles.optionTextSelected
-                          ]}
-                        >
-                          {size}
-                        </Text>
-                      </TouchableOpacity>
-                    )
-                  )}
+                <Text style={styles.sectionTitle}>Size</Text>
+                <View style={styles.optionsContainer}>
+                  {product.sizes.map((size: any) => (
+                    <TouchableOpacity
+                      key={size}
+                      style={[
+                        styles.optionButton,
+                        selectedSize === size && styles.optionButtonSelected
+                      ]}
+                      onPress={() => setSelectedSize(size)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        selectedSize === size && styles.optionTextSelected
+                      ]}>
+                        {size}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             )}
 
-            {/* Variants - Colors */}
-            {product?.variants?.length > 0 && selectedOptions.size && (
+            {/* Colors */}
+            {product.colors?.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Colors</Text>
-                {/* <View style={styles.optionsRow}>
-                  {product.variants
-                    .filter((variant: any) => variant.size === selectedOptions.size)
-                    .map((variant: any, index: number) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.option,
-                          selectedOptions.color === variant.color && styles.optionSelected
-                        ]}
-                        onPress={() => handleChangeVariant('color', variant.color)
-                        }
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            selectedOptions.color === variant.color && styles.optionTextSelected
-                          ]}
-                        >
-                          {variant.color}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                </View> */}
-
-
-                <View style={styles.optionsRow}>
-                  {[...new Set(product.variants.filter((variant: any) => variant.size === selectedOptions.size).map((v: any) => v.color))].map(
-                    (color: any, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.option,
-                          selectedOptions.color === color && styles.optionSelected
-                        ]}
-                        onPress={() => handleChangeVariant('color', color)}
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            selectedOptions.color === color && styles.optionTextSelected
-                          ]}
-                        >
-                          {color}
-                        </Text>
-                      </TouchableOpacity>
-                    )
-                  )}
+                <Text style={styles.sectionTitle}>Color</Text>
+                <View style={styles.optionsContainer}>
+                  {product.colors.map((color: any) => (
+                    <TouchableOpacity
+                      key={color}
+                      style={[
+                        styles.optionButton,
+                        selectedColor === color && styles.optionButtonSelected
+                      ]}
+                      onPress={() => setSelectedColor(color)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        selectedColor === color && styles.optionTextSelected
+                      ]}>
+                        {color}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             )}
-
-
-
-            {/* Attributes */}
-            {Array.isArray(product.attributes) && product.attributes.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Specifications</Text>
-                {product.attributes.map((attr: any, index: number) => (
-                  <View key={index} style={styles.attrRow}>
-                    <Text style={styles.attrKey}>{attr.key}</Text>
-                    <Text style={styles.attrValue}>{attr.value}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
 
             {/* Description */}
             {product.description && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, flexWrap: 'wrap' }}>
-                  <Text style={styles.description} numberOfLines={showFullDesc ? undefined : 2} ellipsizeMode='tail'>{product.description}</Text>
-                  <TouchableOpacity onPress={() => setShowFullDesc(!showFullDesc)}><Text style={{ color: Colors.light.link, fontWeight: '500' }}>{showFullDesc ? 'Hide' : 'More'}</Text></TouchableOpacity>
-                </View>
+                <Text style={styles.description}>{product.description}</Text>
               </View>
             )}
-
-
-            {/* Reviews */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Reviews</Text>
-              {reviews.length === 0 ? (
-                <Text style={{ color: '#6B7280' }}>No reviews yet</Text>
-              ) : (
-                <FlatList
-                  data={reviews}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <View style={styles.reviewCard}>
-                      <View style={styles.reviewHeader}>
-                        <Text style={styles.reviewUser}>{item.user}</Text>
-                        <View style={styles.starsRow}>
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={14} color={i < item.rating ? '#F59E0B' : '#D1D5DB'} fill={i < item.rating ? '#F59E0B' : 'none'} />
-                          ))}
-                        </View>
-                      </View>
-                      <Text style={styles.reviewText}>{item.comment}</Text>
-                    </View>
-                  )}
-                />
-              )}
-            </View>
           </View>
 
         </Animated.ScrollView>
@@ -639,8 +480,8 @@ const styles = StyleSheet.create({
   },
   discount: {
     fontSize: 14,
-    color: Colors.light.danger,
-    fontWeight: '500',
+    color: '#2ed573',
+    fontWeight: 'bold',
     marginLeft: 12,
   },
   section: {
@@ -884,19 +725,4 @@ const styles = StyleSheet.create({
   },
 
 
-  priceRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
-  optionsRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  option: { borderWidth: 1, borderColor: '#D1D5DB', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 8, marginBottom: 8 },
-  optionSelected: { backgroundColor: '#333', borderColor: '#333' },
-  attrRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  attrKey: { fontWeight: '600', color: '#374151', maxWidth: '40%' },
-  attrValue: { color: '#6B7280', maxWidth: '60%', textAlign: 'left', flex: 1 },
-
-  reviewCard: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  reviewUser: { fontWeight: '600', color: '#111827' },
-  starsRow: { flexDirection: 'row' },
-  reviewText: { marginTop: 4, color: '#374151' },
-  reviewBtn: { marginTop: 10, padding: 10, backgroundColor: '#333', borderRadius: 6, alignItems: 'center' },
-  reviewBtnText: { color: '#fff', fontWeight: '600' },
 });
