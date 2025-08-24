@@ -123,13 +123,13 @@ export default function CartScreen() {
         />
 
         <View style={styles.footer}>
-          <View style={styles.totalContainer}>
+          {/* <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Total Amount:</Text>
             <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
               <Text style={{ fontSize: 12 }}>Exl. Taxes</Text>
               <Text style={styles.totalAmount}>₹{getCartTotal().toFixed(2)}</Text>
             </View>
-          </View>
+          </View> */}
 
           <TouchableOpacity
             onPress={() => router.push('/checkout')}

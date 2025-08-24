@@ -1,4 +1,3 @@
-import { CartItem } from "./product";
 
 interface Address {
     id: string;
@@ -12,17 +11,44 @@ interface Address {
     isDefault: boolean;
 }
 
-interface Order {
-    id: string;
-    items: CartItem[];
+interface OrderItem {
+    productId: string;
+    name: string;
+    description: string;
+    brand: string;
+    category: string;
+    image: string;
+    size?: string;
+    color?: string;
+    price: number;
+    quantity: number;
     total: number;
-    status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
-    orderDate: Date;
-    deliveryAddress: string;
-    paymentMethod: string;
 }
 
+interface Order {
+    id?: string;
+    userId?: string;
+    orderId: string;
+    items: OrderItem[];
+    invoiceNo: string | null;
+    status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+    deliveryAddress: string;
+    paymentMethod: string;
+    isPaid: false,
+    subTotal: number;
+    deliveryFee: number;
+    taxPercentage: number;
+    taxAmount: number;
+    platformFee: number;
+    discount: number;
+    finalTotal: number;
+    notes?: string;
+    estimatedDelivery?: Date;
+    orderDate: Date;
+}
+
+
 export {
-    Address,
-    Order
+    Address, Order, OrderItem
 };
+

@@ -1,9 +1,11 @@
 import LocationSelector from '@/components/LocationSelector';
 import { Colors } from '@/constants/Colors';
-import { sendOrderNotification } from '@/services/notificationService';
+import { firebaseService } from '@/services/firebaseService';
+import { generateOrderId, getEstimatedDeliveryDate, paymentMethods } from '@/services/utilityService';
 // import { startRazorpayPayment } from '@/services/paymentService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
+import { Order, OrderItem } from '@/types/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { CheckCircle, ChevronDown, CreditCard, MapPin } from 'lucide-react-native';
@@ -36,13 +38,6 @@ export default function CheckoutScreen() {
     //     '456 Park Avenue, Mumbai, 400001',
     //     '789 Garden Road, Bangalore, 560001'
     // ];
-
-    const paymentMethods = [
-        { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
-        { id: 'card', name: 'Credit/Debit Card', icon: '💳' },
-        { id: 'upi', name: 'UPI Payment', icon: '📱' },
-        { id: 'wallet', name: 'Digital Wallet', icon: '💰' }
-    ];
 
     // const handleRazorpayPayment = async () => {
     //     try {
@@ -136,22 +131,52 @@ export default function CheckoutScreen() {
 
         try {
             // Simulate payment processing
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const items: OrderItem[] = cart.map(item => {
+                const productVariant = item.product.variants.find(
+                    variant => variant.size === item.selectedSize && variant.color === item.selectedColor
+                );
 
-            const order = {
-                items: cart,
-                total: finalTotal,
+                return {
+                    productId: item.product.id,
+                    name: item.product.title,
+                    description: item.product.description,
+                    brand: item.product.brand,
+                    category: item.product.category,
+                    image: item.product.image,
+                    size: productVariant?.size,
+                    color: productVariant?.color,
+                    price: productVariant?.price ?? 0,
+                    quantity: item.quantity,
+                    total: Number(productVariant?.price ?? 0) * item.quantity
+                };
+            });
+
+            const order: Order = {
+                orderId: generateOrderId(),
+                items: items,
+                invoiceNo: null,
                 status: 'pending' as const,
+                isPaid: false,
                 deliveryAddress: getSelectedLocation(selectedLocation),
                 paymentMethod: selectedPayment,
-                notes: orderNotes
+                subTotal: cartTotal,
+                deliveryFee,
+                estimatedDelivery: getEstimatedDeliveryDate(new Date(), 'standard'),
+                taxPercentage,
+                taxAmount: tax,
+                platformFee,
+                discount: 0,
+                finalTotal,
+                notes: orderNotes,
+                orderDate: new Date()
             };
 
-            // addOrder(order);
+            console.log('order', JSON.stringify(order, null, 2));
+            await firebaseService.addOrder(userId, order);
             clearCart();
 
             // Send push notification
-            await sendOrderNotification('pending', `CS${Date.now()}`);
+            // await sendOrderNotification('pending', `CS${Date.now()}`);
             Alert.alert(
                 'Order Placed Successfully!',
                 `Your order has been placed successfully. Order total: ₹${finalTotal.toLocaleString()}`,
@@ -398,7 +423,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#f8f9fa',
     },
     orderItemInfo: {
-        flex: 1,
+        flex: 0.9,
     },
     orderItemName: {
         fontSize: 14,

@@ -29,6 +29,8 @@ export const Colors = {
       end: '#3AB7BF',
     },
     primaryButtonForeground: '#333',
+    primaryButton: '#333',
+    primaryButtonText: '#fff'
   },
   dark: {
     text: '#ECEDEE',

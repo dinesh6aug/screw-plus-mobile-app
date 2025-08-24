@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import Address from '@/types/types';
+import { Address } from '@/types/types';
 import { Building, Home, MapPin } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';

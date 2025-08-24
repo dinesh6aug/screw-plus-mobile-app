@@ -1,5 +1,6 @@
 import BannersTab from '@/components/admin/BannersTab';
 import CategoriesTab from '@/components/admin/CategoriesTab';
+import OrderTab from '@/components/admin/OrderTab';
 import ProductsTab from '@/components/admin/ProductsTab';
 import StatsTab from '@/components/admin/StatsTab';
 import { BarChart3, Grid3X3, Image, Package } from 'lucide-react-native';
@@ -16,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
-type TabType = 'products' | 'categories' | 'banners' | 'stats';
+type TabType = 'products' | 'categories' | 'banners' | 'stats' | 'orders';
 
 interface Tab {
   id: TabType;
@@ -30,6 +31,7 @@ const tabs: Tab[] = [
   { id: 'categories', title: 'Categories', icon: Grid3X3, color: '#10B981' },
   { id: 'products', title: 'Products', icon: Package, color: '#3B82F6' },
   { id: 'banners', title: 'Banners', icon: Image, color: '#F59E0B' },
+  { id: 'orders', title: 'Orders', icon: Image, color: '#F59E0B' },
 ];
 
 export default function AdminScreen() {
@@ -45,6 +47,8 @@ export default function AdminScreen() {
         return <BannersTab />;
       case 'stats':
         return <StatsTab />;
+      case 'orders':
+        return <OrderTab />;
       default:
         return <ProductsTab />;
     }

@@ -20,6 +20,7 @@ const getAddressIcon = (type: string) => {
 };
 
 export default function AddressesScreen() {
+  const { updateSelectedLocation, selectedLocation } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
   const [modalVisible, setModalVisible] = useState(false);
@@ -76,7 +77,9 @@ export default function AddressesScreen() {
     );
   };
 
-  const handleSetDefault = (addressId: string) => {
+  const handleSetDefault = async (addressId: string) => {
+    console.log('default addressId', addressId);
+    await updateSelectedLocation(addressId);
     setAddresses(prev =>
       prev.map(addr => ({
         ...addr,
@@ -99,7 +102,7 @@ export default function AddressesScreen() {
             </View>
           </View>
           <View style={[styles.addressActions, { flexDirection: 'row', alignItems: 'center' }]}>
-            {address.isDefault && (
+            {address.id === selectedLocation && (
               <View style={styles.defaultBadge}>
                 <Text style={styles.defaultText}>Default</Text>
               </View>
@@ -116,7 +119,7 @@ export default function AddressesScreen() {
           <Text style={[styles.addressType, { fontWeight: '500', fontSize: 14, color: '#000' }]}>{formatAddress(address)}</Text>
         </View>
         {/* ...rest as it is */}
-        {!address.isDefault && (
+        {address.id !== selectedLocation && (
           <TouchableOpacity
             style={styles.setDefaultButton}
             onPress={() => handleSetDefault(address.id)}

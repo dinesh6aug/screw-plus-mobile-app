@@ -276,15 +276,46 @@ class FirebaseService {
   async getOrders(userId: string): Promise<Order[]> {
     const orderRef = collection(db, `users/${userId}/orders`);
     const snapshot = await getDocs(orderRef);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Order[];
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as Omit<Order, "id">; // Exclude id since it's from doc.id
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
   }
 
   async addOrder(userId: string, order: Omit<Order, 'id'>): Promise<string> {
+    // 1. Save order
     const orderRef = collection(db, `users/${userId}/orders`);
     const docRef = await addDoc(orderRef, order);
+
+    // 2. Loop through items to update stock
+    for (const item of order.items) {
+      const productRef = doc(db, `products/${item.productId}`);
+      const productSnap = await getDoc(productRef);
+
+      if (productSnap.exists()) {
+        const productData = productSnap.data();
+        const variants = productData.variants || [];
+
+        // Find matching variant by size + color
+        const updatedVariants = variants.map((v: any) => {
+          if (v.size === item.size && v.color === item.color) {
+            const newStock = (v.stock || 0) - item.quantity;
+            if (newStock < 0) {
+              throw new Error(`Not enough stock for ${item.productId}`);
+            }
+            return { ...v, stock: newStock };
+          }
+          return v;
+        });
+
+        // Update product with new variants array
+        await updateDoc(productRef, { variants: updatedVariants });
+      }
+    }
     return docRef.id;
   }
 

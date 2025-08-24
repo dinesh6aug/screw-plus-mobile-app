@@ -85,9 +85,11 @@ export default function ProductDetailScreen() {
       alert('Please select size and color');
       return;
     }
-    addToCart(product, selectedOptions.size, selectedOptions.color);
-    alert('Added to cart!');
-    Vibration.vibrate(500);
+    const cartResult = addToCart(product, selectedOptions.size, selectedOptions.color);
+    if (cartResult !== null) {
+      alert('Added to cart!');
+      Vibration.vibrate(500);
+    }
   };
 
   const handleBuyNow = () => {
@@ -98,15 +100,20 @@ export default function ProductDetailScreen() {
         item.selectedColor === selectedOptions.color
     );
 
-    if (existingItem) {
-      router.push('/cart');
-    } else {
-      if (!selectedOptions.size || !selectedOptions.color) {
-        alert('Please select size and color');
-        return;
+    const cartResult = addToCart(product, selectedOptions.size, selectedOptions.color);
+
+    if (cartResult !== null) {
+      if (existingItem) {
+        router.push('/cart');
+      } else {
+        if (!selectedOptions.size || !selectedOptions.color) {
+          alert('Please select size and color');
+          return;
+        }
+        addToCart(product, selectedOptions.size, selectedOptions.color);
+
+        router.push('/cart');
       }
-      addToCart(product, selectedOptions.size, selectedOptions.color);
-      router.push('/cart');
     }
   };
 
@@ -314,7 +321,7 @@ export default function ProductDetailScreen() {
 
               {/* Image Indicators */}
               <View style={styles.imageIndicators}>
-                {productImages.map((_, index) => (
+                {product.images.map((_:any, index:number) => (
                   <View
                     key={index}
                     style={[
@@ -524,16 +531,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   imageContainer: {
-    height: HEADER_HEIGHT,
+    height: 400,
     overflow: 'hidden',
   },
   imageSliderContainer: {
-    height: HEADER_HEIGHT + 100,
+    height: 400,
   },
   productImage: {
     width: SCREEN_WIDTH,
-    height: HEADER_HEIGHT + 100,
-    resizeMode: 'cover',
+    height: 400,
+    resizeMode: 'contain',
   },
   imageIndicators: {
     position: 'absolute',
@@ -548,11 +555,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(107, 108, 110, 0.5)',
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: 'red',
+    backgroundColor: Colors.light.primary,
     width: 24,
   },
   header: {

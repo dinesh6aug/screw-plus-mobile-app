@@ -1,4 +1,5 @@
 import { CartItem, Product } from '@/types/product';
+import { Alert } from 'react-native';
 import { create } from 'zustand';
 
 // export interface Order {
@@ -47,6 +48,23 @@ export const useStore = create<StoreState>((set, get) => ({
   selectedCategory: 'All',
 
   addToCart: (product, size, color, quantity = 1) => {
+
+    const variant = product.variants.find(
+      (variant) => variant.size === size && variant.color === color
+    );
+
+    // ✅ Agar variant hi na mile to handle karo
+    if (!variant) {
+      Alert.alert("Variant not found");
+      return null;
+    }
+
+    // ✅ Stock check
+    if (variant.stock <= 0) {
+      Alert.alert("Out of Stock");
+      return null;
+    }
+
     set((state) => {
       const existingItemIndex = state.cart.findIndex(
         item => item.product.id === product.id &&

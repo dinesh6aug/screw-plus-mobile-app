@@ -1,8 +1,11 @@
-import { getProductVariant } from '@/services/utilityService';
-import { Order } from '@/types/types';
+import { Colors } from '@/constants/Colors';
+import { firebaseService } from '@/services/firebaseService';
+import { formatDate, formatTimestampDate, getEstimatedDeliveryDate, getStatusColor, getTimestampToDate } from '@/services/utilityService';
+import { useAuth } from '@/store/useAuth';
+import { Order, OrderItem } from '@/types/types';
 import { router } from 'expo-router';
 import { CheckCircle, Clock, Package, ShoppingBag, Truck, XCircle } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Image,
@@ -13,8 +16,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -33,34 +34,22 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return '#ffa502';
-    case 'processing':
-      return '#3742fa';
-    case 'shipped':
-      return '#2f3542';
-    case 'delivered':
-      return '#2ed573';
-    case 'cancelled':
-      return '#ff4757';
-    default:
-      return '#ffa502';
-  }
-};
-
 export default function OrdersScreen() {
-  // const { orders } = useStore();
-
-  const orders: Order[] = [];
+  const [orders, setOrder] = useState<Order[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [animatedValues] = useState(() =>
-    orders.reduce((acc, order) => {
-      acc[order.id] = new Animated.Value(0);
-      return acc;
-    }, {} as Record<string, Animated.Value>)
-  );
+  const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
+  const { user }: any = useAuth();
+  const userId = user.uid;
+
+  useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToOrder(userId, (data) => {
+      setOrder(data);
+      const values: Record<string, Animated.Value> = {};
+      data.forEach(order => { values[order.orderId] = new Animated.Value(1); });
+      setAnimatedValues(values);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const toggleOrderExpansion = (orderId: string) => {
     const isExpanded = expandedOrder === orderId;
@@ -81,22 +70,47 @@ export default function OrdersScreen() {
     }
   };
 
-  const renderOrderItem = (order: any) => {
-    const isExpanded = expandedOrder === order.id;
-    const animatedHeight = animatedValues[order.id]?.interpolate({
+  const goToOrder = (order: Order) => {
+    router.push({
+      pathname: "/order/[id]",
+      params: {
+        id: order.id || '', // required
+        orderId: order.orderId,
+        placedOn: `${formatTimestampDate(order.orderDate)}`,
+        items: JSON.stringify(order.items), // 👈 stringify
+        status: order.status,
+        estimatedDelivery: `${formatDate(getEstimatedDeliveryDate(getTimestampToDate(order.orderDate)))}`,
+        deliveryAddress: order.deliveryAddress,
+        billingAddress: order.deliveryAddress,
+        paymentMethod: order.paymentMethod,
+        subTotal: order.subTotal,
+        deliveryFee: order.deliveryFee,
+        platformFee: order.platformFee,
+        discount: order.discount,
+        taxPercentage: order.taxPercentage,
+        taxAmount: order.taxAmount,
+        total: order.finalTotal,
+      },
+    });
+
+  };
+
+  const renderOrderItem = (order: Order) => {
+    const isExpanded = expandedOrder === order.orderId;
+    const animatedHeight = isExpanded ? animatedValues[order.orderId]?.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, order.items.length * 80 + 20],
-    }) || new Animated.Value(0);
+      outputRange: [0, order.items.length * 75],
+    }) || new Animated.Value(0) : 0;
 
     return (
-      <View key={order.id} style={styles.orderCard}>
+      <View key={order.orderId} style={styles.orderCard}>
         <TouchableOpacity
           style={styles.orderHeader}
-          onPress={() => toggleOrderExpansion(order.id)}
+          onPress={() => toggleOrderExpansion(order.orderId)}
         >
           <View style={styles.orderHeaderLeft}>
-            <Text style={styles.orderNumber}>#CS{order.id}</Text>
-            <Text style={styles.orderDate}>{order.orderDate.toLocaleDateString()}</Text>
+            <Text style={styles.orderNumber}>#{order.orderId}</Text>
+            <Text style={styles.orderDate}>{formatTimestampDate(order.orderDate)}</Text>
           </View>
 
           <View style={styles.orderHeaderRight}>
@@ -106,18 +120,18 @@ export default function OrdersScreen() {
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </Text>
             </View>
-            <Text style={styles.orderTotal}>₹{order.total.toLocaleString()}</Text>
+            <Text style={styles.orderTotal}>₹{order.finalTotal.toLocaleString()}</Text>
           </View>
         </TouchableOpacity>
 
         <Animated.View style={[styles.orderItems, { height: animatedHeight }]}>
-          {order.items.map((item: any, index: number) => (
+          {order.items.map((item: OrderItem, index: number) => (
             <View key={index} style={styles.orderItem}>
-              <Image source={{ uri: item.product.image }} style={styles.itemImage} />
+              <Image source={{ uri: item.image }} style={styles.itemImage} />
               <View style={styles.itemDetails}>
-                <Text style={styles.itemName} numberOfLines={1}>{item.product.title}</Text>
-                <Text style={styles.itemVariant}>{item.selectedSize} • {item.selectedColor}</Text>
-                <Text style={styles.itemPrice}>₹{getProductVariant(item.product, item.selectedSize, item.selectedColor).price} × {item.quantity}</Text>
+                <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.itemVariant}>{item.size} • {item.color}</Text>
+                <Text style={styles.itemPrice}>₹{item.price.toLocaleString()} × {item.quantity} QTY</Text>
               </View>
             </View>
           ))}
@@ -133,6 +147,11 @@ export default function OrdersScreen() {
               <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Reorder</Text>
             </TouchableOpacity>
           )}
+
+          <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={() => goToOrder(order)}>
+            <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>View Details</Text>
+          </TouchableOpacity>
+
         </View>
       </View>
     );
@@ -263,17 +282,17 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: '#2162a1',
     marginBottom: 2,
   },
   itemVariant: {
     fontSize: 12,
-    color: '#666',
+    color: '#575959',
     marginBottom: 2,
   },
   itemPrice: {
     fontSize: 12,
-    color: '#333',
+    color: '#0f1111',
     fontWeight: '500',
   },
   orderActions: {
@@ -281,25 +300,23 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#f8f9fa',
+    gap: 8
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#333',
-    paddingVertical: 12,
+    backgroundColor: Colors.light.primaryButton,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 8,
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#333',
-    marginRight: 0,
-    marginLeft: 8,
   },
   actionButtonText: {
-    color: '#fff',
-    fontSize: 14,
+    color: Colors.light.primaryButtonText,
+    fontSize: 15,
     fontWeight: '500',
   },
   secondaryButtonText: {

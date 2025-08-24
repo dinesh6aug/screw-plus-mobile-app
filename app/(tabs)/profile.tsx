@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { firebaseService } from '@/services/firebaseService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
 import { Order } from '@/types/types';
@@ -19,15 +20,28 @@ import {
   User
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
 
-  const orders: Order[] = []
+
   const { user, userProfile, logout } = useAuth();
   const { favorites } = useStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const userId: any = user?.uid;
+
+  const [orders, setOrder] = useState<Order[]>([]);
+
+  React.useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToOrder(userId, (data) => {
+      setOrder(data);
+      const values: Record<string, Animated.Value> = {};
+      data.forEach(order => { values[order.orderId] = new Animated.Value(1); });
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = () => {
     Alert.alert(
@@ -150,7 +164,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.total, 0).toLocaleString()}</Text>
+              <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.finalTotal, 0).toLocaleString()}</Text>
               <Text style={styles.statLabel}>Spent</Text>
             </View>
           </View>
