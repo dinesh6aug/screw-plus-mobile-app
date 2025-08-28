@@ -23,8 +23,8 @@ interface LocationSelectorProps {
 }
 
 export default function LocationSelector({ visible, onClose, getLocations }: LocationSelectorProps) {
-    const userId = "jOTbzfHbBZVdufrrlZIA3GIeAAx1"; // TODO: replace with auth userId
-    const { updateSelectedLocation, selectedLocation } = useAuth();
+    const { updateSelectedLocation, selectedLocation, user } = useAuth();
+    const userId: any = user?.uid;
 
     const [searchQuery, setSearchQuery] = useState('');
     const [locations, setLocations] = useState<{ id: any, label: string }[]>([]);

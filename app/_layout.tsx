@@ -25,6 +25,7 @@ function RootLayoutNav() {
         <Stack.Screen name="product/[id]" options={{ headerShown: false, title: "Product Details" }} />
         <Stack.Screen name="orders" options={{ headerShown: true, title: "My Orders" }} />
         <Stack.Screen name="order/[id]" options={{ headerShown: true, title: "Order Details" }} />
+        <Stack.Screen name="order/[invoice]" options={{ headerShown: true, title: "Invoice" }} />
         <Stack.Screen name="cart" options={{ headerShown: true, title: "Shopping Cart" }} />
         <Stack.Screen name="addresses" options={{ headerShown: true, title: "Addresses" }} />
         <Stack.Screen name="payment-methods" options={{ headerShown: true, title: "Payment Methods" }} />

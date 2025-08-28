@@ -1,19 +1,22 @@
 import LocationSelector from '@/components/LocationSelector';
+import OrderSuccess from '@/components/OrderSuccess';
 import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
-import { generateOrderId, getEstimatedDeliveryDate, paymentMethods } from '@/services/utilityService';
+import { formatTimestampDate, generateOrderId, getEstimatedDeliveryDate, paymentMethods } from '@/services/utilityService';
 // import { startRazorpayPayment } from '@/services/paymentService';
 import { useAuth } from '@/store/useAuth';
 import { useStore } from '@/store/useStore';
 import { Order, OrderItem } from '@/types/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { CheckCircle, ChevronDown, CreditCard, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Vibration, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CheckoutScreen() {
+    const navigation = useNavigation();
+
     const { cart, getCartTotal, clearCart } = useStore();
     const { user }: any = useAuth();
     const userId = user.uid;
@@ -23,8 +26,10 @@ export default function CheckoutScreen() {
     const [locations, setLocations] = useState<{ id: string, label: string }[]>([]);
 
     const { selectedLocation } = useAuth();
-    console.log('selectedLocation', JSON.stringify(selectedLocation, null, 2))
     const [showLocationSelector, setShowLocationSelector] = useState(false);
+    const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
+    const [orderDetails, setOrderDetails] = React.useState<any>({});
 
     const cartTotal = getCartTotal();
     const deliveryFee = 50;
@@ -171,32 +176,64 @@ export default function CheckoutScreen() {
                 orderDate: new Date()
             };
 
-            console.log('order', JSON.stringify(order, null, 2));
+            // console.log('order', JSON.stringify(order, null, 2));
+            setOrderDetails(order);
             await firebaseService.addOrder(userId, order);
+            Vibration.vibrate(500);
             clearCart();
-
+            setIsOrderPlaced(true);
             // Send push notification
             // await sendOrderNotification('pending', `CS${Date.now()}`);
-            Alert.alert(
-                'Order Placed Successfully!',
-                `Your order has been placed successfully. Order total: ₹${finalTotal.toLocaleString()}`,
-                [
-                    {
-                        text: 'View Orders',
-                        onPress: () => router.replace('/orders')
-                    },
-                    {
-                        text: 'Continue Shopping',
-                        onPress: () => router.replace('/(tabs)')
-                    }
-                ]
-            );
+            // Alert.alert(
+            //     'Order Placed Successfully!',
+            //     `Your order has been placed successfully. Order total: ₹${finalTotal.toLocaleString()}`,
+            //     [
+            //         {
+            //             text: 'View Orders',
+            //             onPress: () => router.replace('/orders')
+            //         },
+            //         {
+            //             text: 'Continue Shopping',
+            //             onPress: () => router.replace('/(tabs)')
+            //         }
+            //     ]
+            // );
         } catch {
             Alert.alert('Error', 'Failed to place order. Please try again.');
         } finally {
             setIsProcessing(false);
         }
     };
+
+
+    React.useEffect(() => {
+        if (isOrderPlaced) {
+            navigation.setOptions({
+                title: "Order Confirmation",
+                headerBackVisible: false, // ✅ hides the back button
+                gestureEnabled: false,    // ✅ disables swipe back on iOS
+            });
+        } else {
+            navigation.setOptions({
+                title: "Checkout",
+                headerBackVisible: true,
+                gestureEnabled: true,
+            });
+        }
+    }, [isOrderPlaced]);
+
+    if (isOrderPlaced) {
+        return (
+            <OrderSuccess
+                order={{
+                    id: orderDetails.orderId,
+                    date: `${formatTimestampDate(orderDetails.orderDate)}`,
+                    amount: orderDetails.finalTotal,
+                    status: orderDetails.status,
+                }}
+            />
+        );
+    }
 
     if (cart.length === 0) {
         return (

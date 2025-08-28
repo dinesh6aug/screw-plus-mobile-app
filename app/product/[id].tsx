@@ -44,13 +44,6 @@ export default function ProductDetailScreen() {
 
   const cartItemsCount = getCartItemsCount();
 
-  // Mock multiple images for slider
-  const productImages = [
-    product?.image || '',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
-  ];
-
   useEffect(() => {
     if (!id) return;
 
@@ -110,7 +103,6 @@ export default function ProductDetailScreen() {
           alert('Please select size and color');
           return;
         }
-        addToCart(product, selectedOptions.size, selectedOptions.color);
 
         router.push('/cart');
       }
@@ -205,6 +197,7 @@ export default function ProductDetailScreen() {
     });
   };
 
+  const isOutOfStock = Number(selectedOptions.stock || 0) === 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -321,7 +314,7 @@ export default function ProductDetailScreen() {
 
               {/* Image Indicators */}
               <View style={styles.imageIndicators}>
-                {product.images.map((_:any, index:number) => (
+                {product.images.map((_: any, index: number) => (
                   <View
                     key={index}
                     style={[
@@ -366,6 +359,13 @@ export default function ProductDetailScreen() {
             ) : (
               <Text style={styles.price}>Please select options</Text>
             )}
+
+
+            {
+              isOutOfStock && (
+                <Text style={{ marginBottom: 20, fontSize: 18, fontWeight: '500', color: Colors.light.danger }}>Out of stock</Text>
+              )
+            }
 
             {/* Variants - Sizes */}
             {product?.variants?.length > 0 && (
@@ -512,11 +512,11 @@ export default function ProductDetailScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
+          <TouchableOpacity style={[styles.addToCartButton, { opacity: isOutOfStock ? 0.2 : 1 }]} onPress={handleAddToCart} disabled={isOutOfStock}>
             <ShoppingCart size={20} color="#333" />
             <Text style={styles.addToCartText}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
+          <TouchableOpacity style={[styles.buyNowButton, { opacity: isOutOfStock ? 0.2 : 1 }]} onPress={handleBuyNow} disabled={isOutOfStock}>
             <Text style={styles.buyNowText}>Buy Now</Text>
           </TouchableOpacity>
         </View>

@@ -1,3 +1,4 @@
+import TrackOrder from '@/components/TrackOrder';
 import { Colors } from '@/constants/Colors';
 import { firebaseService } from '@/services/firebaseService';
 import { formatDate, formatTimestampDate, getEstimatedDeliveryDate, getStatusColor, getTimestampToDate } from '@/services/utilityService';
@@ -40,6 +41,8 @@ export default function OrdersScreen() {
   const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
   const { user }: any = useAuth();
   const userId = user.uid;
+
+  const [showTrackOrder, setShowTrackOrder] = React.useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = firebaseService.subscribeToOrder(userId, (data) => {
@@ -138,9 +141,12 @@ export default function OrdersScreen() {
         </Animated.View>
 
         <View style={styles.orderActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Track Order</Text>
-          </TouchableOpacity>
+
+          {!['delivered', 'cancelled'].includes(order.status) && (
+            <TouchableOpacity style={styles.actionButton} onPress={() => setShowTrackOrder(true)}>
+              <Text style={styles.actionButtonText}>Track Order</Text>
+            </TouchableOpacity>
+          )}
 
           {order.status === 'delivered' && (
             <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
@@ -184,6 +190,11 @@ export default function OrdersScreen() {
           {orders.map(renderOrderItem)}
         </View>
       </ScrollView>
+
+      <TrackOrder
+        visible={showTrackOrder}
+        onClose={() => setShowTrackOrder(false)}
+      />
     </SafeAreaView>
   );
 }

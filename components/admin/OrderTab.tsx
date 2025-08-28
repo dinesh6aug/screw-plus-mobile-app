@@ -1,19 +1,42 @@
+import { Colors } from '@/constants/Colors';
+import { firebaseService } from '@/services/firebaseService';
+import { formatDate, formatTimestampDate, getEstimatedDeliveryDate, getStatusColor, getTimestampToDate } from '@/services/utilityService';
+import { useAuth } from '@/store/useAuth';
 import { useFirebaseData } from '@/store/useFirebaseData';
-import { Product } from '@/types/product';
-import { Order } from '@/types/types';
-import { Package } from 'lucide-react-native';
+import { Order, OrderItem } from '@/types/types';
+import { router } from 'expo-router';
+import { CheckCircle, Clock, Package, Truck, XCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
+  Alert,
+  Animated,
   Image,
-  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native';
-import NewProductFormModal from './NewProductFormModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // import ProductFormModal from './ProductFormModal';
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return <Clock size={16} color="#ffa502" />;
+    case 'processing':
+      return <Package size={16} color="#3742fa" />;
+    case 'shipped':
+      return <Truck size={16} color="#2f3542" />;
+    case 'delivered':
+      return <CheckCircle size={16} color="#2ed573" />;
+    case 'cancelled':
+      return <XCircle size={16} color="#ff4757" />;
+    default:
+      return <Clock size={16} color="#ffa502" />;
+  }
+};
 
 export default function OrderTab() {
   const { products, loading, deleteProduct } = useFirebaseData();
@@ -21,72 +44,200 @@ export default function OrderTab() {
   const [editingProduct, setEditingProduct] = useState<Order | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+
+  const [orders, setOrder] = useState<Order[]>([]);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [animatedValues, setAnimatedValues] = useState<Record<string, Animated.Value>>({});
+  const { user }: any = useAuth();
+  const userId = user.uid;
+
+  // React.useEffect(() => {
+  //   (async () => {
+  //     const orders = await firebaseService.getAllOrders();
+  //     setOrder(orders);
+  //   })();
+  // }, []);
+
+  React.useEffect(() => {
+    const unsubscribe = firebaseService.subscribeToAllOrders((data) => {
+      setOrder(data);
+      const values: Record<string, Animated.Value> = {};
+      data.forEach(order => { values[order.orderId] = new Animated.Value(1); });
+      setAnimatedValues(values);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const goToOrder = (order: Order) => {
+    router.push({
+      pathname: "/order/[id]",
+      params: {
+        id: order.id || '', // required
+        orderId: order.orderId,
+        placedOn: `${formatTimestampDate(order.orderDate)}`,
+        items: JSON.stringify(order.items), // 👈 stringify
+        status: order.status,
+        estimatedDelivery: `${formatDate(getEstimatedDeliveryDate(getTimestampToDate(order.orderDate)))}`,
+        deliveryAddress: order.deliveryAddress,
+        billingAddress: order.deliveryAddress,
+        paymentMethod: order.paymentMethod,
+        subTotal: order.subTotal,
+        deliveryFee: order.deliveryFee,
+        platformFee: order.platformFee,
+        discount: order.discount,
+        taxPercentage: order.taxPercentage,
+        taxAmount: order.taxAmount,
+        total: order.finalTotal,
+      },
+    });
+
   };
 
-  const renderProduct = ({ item }: { item: Product }) => (
-    <View style={styles.productCard}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.productCategory}>{item.category}</Text>
-        <Text style={styles.productPrice}>₹{item.price}</Text>
-        <View style={styles.productStats}>
-          <Text style={styles.statText}>★ {item.rating}</Text>
-          <Text style={styles.statText}>({item.reviews})</Text>
+  const toggleOrderExpansion = (orderId: string) => {
+    const isExpanded = expandedOrder === orderId;
+
+    if (isExpanded) {
+      Animated.timing(animatedValues[orderId], {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setExpandedOrder(null));
+    } else {
+      setExpandedOrder(orderId);
+      Animated.timing(animatedValues[orderId], {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  const renderOrderItem = (order: Order) => {
+
+
+    const isExpanded = expandedOrder === order.orderId;
+    const animatedHeight = isExpanded ? animatedValues[order.orderId]?.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, order.items.length * 75],
+    }) || new Animated.Value(0) : 0;
+
+
+    const handleAction = async (action: string) => {
+      switch (action) {
+        case 'accept':
+          Alert.alert(
+            'Accept Order',
+            'Are you sure you want to accept this order?',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => null
+              },
+              {
+                text: 'Confirm',
+                onPress: () => null
+              }
+            ]
+          );
+          break;
+        case 'reject':
+          Alert.alert(
+            'Reject Order',
+            'Are you sure you want to reject this order?',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => null
+              },
+              {
+                text: 'Confirm',
+                onPress: () => null
+              }
+            ]
+          );
+          break;
+      }
+    }
+
+    return (
+      <View key={order.orderId} style={styles.orderCard}>
+        <TouchableOpacity
+          style={styles.orderHeader}
+          onPress={() => toggleOrderExpansion(order.orderId)}
+        >
+          <View style={styles.orderHeaderLeft}>
+            <Text style={styles.orderNumber}>#{order.orderId}</Text>
+            <Text style={styles.orderDate}>{formatTimestampDate(order.orderDate)}</Text>
+          </View>
+
+          <View style={styles.orderHeaderRight}>
+            <View style={styles.statusContainer}>
+              {getStatusIcon(order.status)}
+              <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </Text>
+            </View>
+            <Text style={styles.orderTotal}>₹{order.finalTotal.toLocaleString()}</Text>
+          </View>
+        </TouchableOpacity>
+
+        <Animated.View style={[styles.orderItems, { height: animatedHeight }]}>
+          {order.items.map((item: OrderItem, index: number) => (
+            <View key={index} style={styles.orderItem}>
+              <Image source={{ uri: item.image }} style={styles.itemImage} />
+              <View style={styles.itemDetails}>
+                <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.itemVariant}>{item.size} • {item.color}</Text>
+                <Text style={styles.itemPrice}>₹{item.price.toLocaleString()} × {item.quantity} QTY</Text>
+              </View>
+            </View>
+          ))}
+        </Animated.View>
+
+        <View style={styles.orderActions}>
+          {
+            order.status === 'pending' && (
+              <>
+                <TouchableOpacity style={[styles.actionButton, styles.secondaryButton, { backgroundColor: Colors.light.success, borderColor: Colors.light.success }]} onPress={() => handleAction('accept')}>
+                  <Text style={[styles.actionButtonText, styles.secondaryButtonText, { color: '#fff' }]}>Accept</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.actionButton, styles.secondaryButton, { backgroundColor: Colors.light.danger, borderColor: Colors.light.danger }]} onPress={() => handleAction('reject')}>
+                  <Text style={[styles.actionButtonText, styles.secondaryButtonText, { color: '#fff' }]}>Reject</Text>
+                </TouchableOpacity>
+              </>
+            )
+          }
+          <TouchableOpacity style={[styles.actionButton]} onPress={() => goToOrder(order)}>
+            <Text style={[styles.actionButtonText]}>View Details</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (loading.products) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator size="large" color="#003873" />
         <Text style={styles.loadingText}>Loading products...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Package size={24} color="#3B82F6" />
-          <Text style={styles.headerTitle}>Orders ({products.length})</Text>
+          <Package size={24} color="#003873" />
+          <Text style={styles.headerTitle}>Orders ({orders.length})</Text>
         </View>
       </View>
-
-      <FlatList
-        data={products}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Package size={48} color="#9CA3AF" />
-            <Text style={styles.emptyText}>No products found</Text>
-            <Text style={styles.emptySubtext}>Add your first product to get started</Text>
-          </View>
-        }
-      />
-
-      <NewProductFormModal
-        visible={showForm}
-        product={editingProduct}
-        onClose={() => {
-          setShowForm(false);
-          setEditingProduct(null);
-        }}
-      />
-    </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.ordersContainer}>
+          {orders.map(renderOrderItem)}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -193,14 +344,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -217,5 +360,122 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9CA3AF',
     marginTop: 4
-  }
+  },
+
+  ordersContainer: {
+    padding: 16,
+  },
+  orderCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  orderHeaderLeft: {
+    flex: 1,
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  orderDate: {
+    fontSize: 12,
+    color: '#666',
+  },
+  orderHeaderRight: {
+    alignItems: 'flex-end',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  orderTotal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  orderItems: {
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+  },
+  orderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8f9fa',
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  itemDetails: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2162a1',
+    marginBottom: 2,
+  },
+  itemVariant: {
+    fontSize: 12,
+    color: '#575959',
+    marginBottom: 2,
+  },
+  itemPrice: {
+    fontSize: 12,
+    color: '#0f1111',
+    fontWeight: '500',
+  },
+  orderActions: {
+    flexDirection: 'row',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f8f9fa',
+    gap: 8
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: Colors.light.primaryButton,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  actionButtonText: {
+    color: Colors.light.primaryButtonText,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  secondaryButtonText: {
+    color: '#333',
+  },
 });

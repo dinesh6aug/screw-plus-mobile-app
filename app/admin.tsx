@@ -31,7 +31,7 @@ const tabs: Tab[] = [
   { id: 'categories', title: 'Categories', icon: Grid3X3, color: '#10B981' },
   { id: 'products', title: 'Products', icon: Package, color: '#3B82F6' },
   { id: 'banners', title: 'Banners', icon: Image, color: '#F59E0B' },
-  { id: 'orders', title: 'Orders', icon: Image, color: '#F59E0B' },
+  { id: 'orders', title: 'Orders', icon: Package, color: '#003873' },
 ];
 
 export default function AdminScreen() {

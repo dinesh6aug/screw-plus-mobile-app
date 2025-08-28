@@ -4,6 +4,7 @@ import { Address, Order } from '@/types/types';
 import {
   addDoc,
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
   getDoc,
@@ -336,6 +337,29 @@ class FirebaseService {
         id: doc.id,
         ...doc.data(),
       })) as Order[];
+      callback(orders);
+    });
+  }
+
+  // Admin: Get all orders across all users
+  subscribeToAllOrders(
+    callback: (orders: (Order & { userId: string })[]) => void
+  ) {
+    const ordersRef = collectionGroup(db, "orders");
+
+    return onSnapshot(ordersRef, (snapshot) => {
+      const orders = snapshot.docs.map((doc) => {
+        const data = doc.data() as Omit<Order, "id">;
+        const pathParts = doc.ref.path.split("/"); // "users/{userId}/orders/{orderId}"
+        const userId = pathParts[1]; // extract userId
+
+        return {
+          id: doc.id,
+          userId,
+          ...data,
+        };
+      });
+
       callback(orders);
     });
   }

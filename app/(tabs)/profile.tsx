@@ -164,7 +164,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>₹{orders.reduce((total, order) => total + order.finalTotal, 0).toLocaleString()}</Text>
+              <Text style={styles.statNumber}>₹{orders.filter(order => order.status !== 'cancelled').reduce((total, order) => total + order.finalTotal, 0).toLocaleString()}</Text>
               <Text style={styles.statLabel}>Spent</Text>
             </View>
           </View>

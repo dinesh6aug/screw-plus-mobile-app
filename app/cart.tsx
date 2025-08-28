@@ -26,6 +26,7 @@ export default function CartScreen() {
 
   const renderCartItem = ({ item }: { item: CartItem }) => {
     const selectedVariant: any = item.product.variants.find(product => product.size === item.selectedSize && product.color === item.selectedColor);
+    const isOutOfStock = item.quantity >= selectedVariant.stock;
     return (
       <View style={styles.cartItem}>
         <Image source={{ uri: item.product.image }} style={styles.itemImage} />
@@ -66,8 +67,9 @@ export default function CartScreen() {
             <Text style={styles.quantity}>{item.quantity}</Text>
 
             <TouchableOpacity
-              style={styles.quantityButton}
+              style={[styles.quantityButton, { opacity: isOutOfStock ? 0.5 : 1 }]}
               onPress={() => handleQuantityChange(item, item.quantity + 1)}
+              disabled={isOutOfStock}
             >
               <Plus size={16} color="#666" />
             </TouchableOpacity>
