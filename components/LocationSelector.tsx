@@ -85,7 +85,7 @@ export default function LocationSelector({ visible, onClose, getLocations }: Loc
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.searchContainer}>
+                {/* <View style={styles.searchContainer}>
                     <Search size={20} color="#666" style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
@@ -94,7 +94,7 @@ export default function LocationSelector({ visible, onClose, getLocations }: Loc
                         onChangeText={setSearchQuery}
                         autoCapitalize="words"
                     />
-                </View>
+                </View> */}
 
                 {isLoading ? (
                     // 🔹 Loader state

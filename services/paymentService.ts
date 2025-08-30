@@ -20,12 +20,13 @@ export const startRazorpayPayment = (params: {
 }) => {
     const options: any = {
         description: params.description,
-        image: 'http://staging.autogeniuslite.com/app-assets/img/ico/favicon-32.png',
+        image: 'https://screwplus.in/wp-content/uploads/2025/08/cropped-ChatGPT-Image-Aug-17-2025-09_44_07-PM-192x192.png',
         currency: 'INR',
         key: params.key, // Test API Key
         amount: params.amount, // amount in paisa
         name: params.companyName,
-        order_id: params.orderId, // Razorpay Order ID from backend
+        // order_id: params.orderId, // Razorpay Order ID from backend
+        order_id: '', // Razorpay Order ID from backend
         prefill: {
             email: params.email,
             contact: params.contact,

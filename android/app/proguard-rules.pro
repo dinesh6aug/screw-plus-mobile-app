@@ -12,3 +12,10 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 # Add any project specific keep options here:
+
+# Keep Razorpay SDK classes
+-keep class com.razorpay.** { *; }
+-dontwarn com.razorpay.**
+
+# Keep ProGuard annotations if still referenced
+-keep class proguard.annotation.** { *; }

@@ -9,6 +9,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -62,8 +63,18 @@ export default function TrackOrder({ visible, onClose }: any) {
         >
             <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
 
-                <Text style={styles.header}>Order Tracking</Text>
-                <Text style={styles.orderId}>#825791537</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+                    <View></View>
+                    <View>
+                        <Text style={styles.header}>Order Tracking</Text>
+                        <Text style={styles.orderId}>#825791537</Text>
+                    </View>
+                    <View>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text style={{ fontWeight: '600' }}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
 

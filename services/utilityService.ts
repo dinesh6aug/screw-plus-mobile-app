@@ -147,7 +147,7 @@ export const getStatusColor = (status: string) => {
 
 export const paymentMethods = [
     { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
-    { id: 'card', name: 'Credit/Debit Card', icon: '💳' },
-    { id: 'upi', name: 'UPI Payment', icon: '📱' },
-    { id: 'wallet', name: 'Digital Wallet', icon: '💰' }
+    // { id: 'card', name: 'Credit/Debit Card', icon: '💳' },
+    { id: 'online', name: 'Online Payment', icon: '📱' },
+    // { id: 'wallet', name: 'Digital Wallet', icon: '💰' }
 ];

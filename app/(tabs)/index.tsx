@@ -36,7 +36,7 @@ export default function HomeScreen() {
 
   const renderProduct = ({ item }: { item: any }) => (
     <View style={styles.productContainer}>
-      <ProductCard product={item} width={180}/>
+      <ProductCard product={item} width={180} />
     </View>
   );
 
@@ -116,7 +116,7 @@ export default function HomeScreen() {
       end={{ x: 1, y: 0 }}    // gradient end point
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['top', 'left', 'right']}>
-        <StatusBar barStyle={'default'} />
+        <StatusBar barStyle={'default'} translucent backgroundColor="transparent" />
         <View style={styles.container}>
           <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
             {renderHeader()}

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 interface PdfPreviewProps {
@@ -20,7 +20,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ }) => {
 
   return (
     <View style={styles.container}>
-      <WebView
+      {/* <WebView
         source={{ uri: invoiceUri }}
         style={styles.webview}
         startInLoadingState={true}
@@ -31,7 +31,36 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ }) => {
             style={styles.loader}
           />
         )}
-      />
+      /> */}
+
+      {
+        invoiceUri && (
+          <>
+            {
+              Platform.OS === 'android' ? (
+                <WebView
+                  source={{ uri: `https://drive.google.com/viewerng/viewer?embedded=true&url=${invoiceUri}` }}
+                  style={styles.webview}
+                  scalesPageToFit={true}
+                  automaticallyAdjustContentInsets={true}
+                  injectedJavaScript={`
+                    const meta = document.createElement('meta'); 
+                    meta.setAttribute('name', 'viewport'); 
+                    meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes'); 
+                    document.getElementsByTagName('head')[0].appendChild(meta);
+                    true;
+                `}
+                />
+              ) : Platform.OS === 'ios' ? (
+                <WebView
+                  source={{ uri: invoiceUri }}
+                  style={styles.webview}
+                />
+              ) : null
+            }
+          </>
+        )
+      }
     </View>
   );
 };
